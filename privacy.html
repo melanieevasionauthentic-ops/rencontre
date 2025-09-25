@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Vie privée • À l’Ancienne</title>
+  
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico">
+<meta name="theme-color" content="#22c55e">
+
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="canonical" href="./index.html">
+</head>
+<body>
+  
+<header class="nav container">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>À&nbsp;l’Ancienne</span>
+    <span class="badge">Prototype</span>
+  </div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a>
+    <a href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="safety.html">Sûreté</a>
+    <a href="privacy.html">Vie privée</a>
+  </nav>
+</header>
+
+  
+<main class="container grid">
+  <section class="card">
+    <h1>Vie privée</h1>
+    <p>Prototype statique. Aucune donnée n’est envoyée à un serveur. Tout reste dans ton navigateur.</p>
+    <ul>
+      <li>Localisation: utilisée côté appareil pour la démo.</li>
+      <li>Profil: stocké localement via <span class="mono">localStorage</span>.</li>
+      <li>Rencontres: simulées, rien n’est conservé après rechargement.</li>
+    </ul>
+    <p>Version production : minimisation, géohash arrondi, purge courte, export & suppression en self-serve.</p>
+  </section>
+</main>
+
+  
+<footer class="container">
+  <div>© 2025 À l’Ancienne • Prototype statique pour démonstration. Pas de collecte de données réelles.</div>
+</footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+
+</body>
+</html>

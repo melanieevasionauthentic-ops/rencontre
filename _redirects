@@ -1,0 +1,6 @@
+# Pretty URLs → physical files
+/            /index.html   200
+/onboarding  /onboarding.html   200
+/settings    /settings.html   200
+/privacy     /privacy.html   200
+/safety      /safety.html    200

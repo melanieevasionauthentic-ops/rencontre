@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Radar • À l’Ancienne</title>
+  
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico">
+<meta name="theme-color" content="#22c55e">
+
+  <link rel="stylesheet" href="assets/style.css"/>
+  <link rel="canonical" href="./index.html">
+</head>
+<body>
+  
+<header class="nav container">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>À&nbsp;l’Ancienne</span>
+    <span class="badge">Prototype</span>
+  </div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a>
+    <a href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="safety.html">Sûreté</a>
+    <a href="privacy.html">Vie privée</a>
+  </nav>
+</header>
+
+  
+<main class="container grid">
+  <section class="card">
+    <h1>Radar de proximité</h1>
+    <p>Rencontres spontanées, sans photo ni chat. Active ta disponibilité, on s’occupe du reste.</p>
+    <div class="grid grid-2" style="align-items:start">
+      <div>
+        <div class="map" aria-label="Carte simplifiée">Carte simplifiée (démo)</div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="btn-available">Disponible (60 min)</button>
+          <button class="btn secondary" id="btn-stealth">Stealth 3h</button>
+          <button class="btn ghost" id="btn-simulate">Simuler proximité</button>
+        </div>
+        <small>Astuce : “Simuler proximité” déclenche un faux signal pour tester le parcours.</small>
+      </div>
+      <div class="card">
+        <h2>Proximités</h2>
+        <p id="prox-count" class="kpi"><span class="v">0</span>&nbsp;<span class="mono">à ~100 m</span></p>
+        <hr/>
+        <h2>Règles d’or</h2>
+        <ul class="inline">
+          <li>Consentement double</li><li>Pas de chat</li><li>Zones sensibles exclues</li><li>Fenêtre courte</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Point de rencontre (démo)</h2>
+    <p>Quand deux personnes disent “Oui”, on propose des points publics équilibrés et un code éphémère.</p>
+    <div class="grid grid-2">
+      <div>
+        <div class="row">
+          <button class="btn" id="btn-accept">Dire “Oui”</button>
+          <button class="btn secondary" id="btn-decline">Pas maintenant</button>
+        </div>
+        <p class="notice">Ces boutons n’apparaissent qu’en cas de proximité réelle (ici, démo).</p>
+      </div>
+      <div class="card">
+        <div id="meet-card">
+          <p class="notice">En attente d’une proximité acceptée.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+  
+<footer class="container">
+  <div>© 2025 À l’Ancienne • Prototype statique pour démonstration. Pas de collecte de données réelles.</div>
+</footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+
+</body>
+</html>
