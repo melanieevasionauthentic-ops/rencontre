@@ -169,3 +169,20 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#btn-panic')?.addEventListener('click', panic);
   renderSummary();
 });
+
+
+// --- v3.1: show chosen radius on index and use it in toasts
+const getRadius = () => { try { const s = JSON.parse(localStorage.getItem('settings')||'{}'); return s.radius || 100; } catch(e){ return 100; } };
+const applyRadius = () => { const r = getRadius(); const el = document.getElementById('radius-display'); if (el) el.textContent = String(r); };
+document.addEventListener('DOMContentLoaded', applyRadius);
+
+// Patch simulateProximity toast to include radius
+const _simulateProximity_orig = simulateProximity;
+simulateProximity = () => {
+  const r = getRadius();
+  // temporarily intercept toast to add radius
+  const _toast = toast;
+  toast = (msg) => { _toast(msg.replace('(~100 m)', `(~${r} m)`)); };
+  _simulateProximity_orig();
+  toast = _toast;
+};
