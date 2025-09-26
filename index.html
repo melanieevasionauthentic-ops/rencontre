@@ -1,4 +1,25 @@
-<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1'/><title>Radar • Serendi</title><link rel='icon' type='image/png' sizes='32x32' href='assets/favicon-32.png'><link rel='icon' type='image/png' sizes='16x16' href='assets/favicon-16.png'><link rel='apple-touch-icon' sizes='192x192' href='assets/icon-192.png'><link rel='manifest' href='site.webmanifest'><link rel='shortcut icon' href='assets/favicon.ico'><meta name='theme-color' content='#e879f9'><link rel='stylesheet' href='assets/style.css'/></head><body><header class='nav container'><div class='brand'><svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><circle cx='7' cy='12' r='4' stroke='white' stroke-width='2'/><circle cx='17' cy='12' r='4' stroke='white' stroke-width='2'/><path d='M11 12h2' stroke='white' stroke-width='2' stroke-linecap='round'/></svg><span>Serendi</span><span class='badge'>Prototype</span></div><nav class='row' aria-label='Navigation principale'><a href='index.html'>Radar</a><a href='onboarding.html'>Profil</a><a href='settings.html'>Réglages</a><a href='safety.html'>Sûreté</a><a href='privacy.html'>Vie privée</a></nav></header>
+<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1'/><title>Radar • Serendi</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico">
+<meta name="theme-color" content="#e879f9">
+<link rel='stylesheet' href='assets/style.css'/></head><body>
+<header class="nav container">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Serendi</span>
+    <span class="badge">Prototype</span>
+  </div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="safety.html">Sûreté</a><a href="privacy.html">Vie privée</a>
+  </nav>
+</header>
+
 <main class="container grid">
   <section class="card">
     <h1>Radar de proximité</h1>
@@ -6,7 +27,7 @@
     <div class="grid grid-2" style="align-items:start">
       <div>
         <div class="map" aria-label="Carte simplifiée">Carte simplifiée (démo)</div>
-        <div class="row" style="margin-top:12px">
+        <div class="row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
           <button class="btn" id="btn-available">Disponible (60 min)</button>
           <button class="btn alt" id="btn-stealth">Mettre en pause (3 h)</button>
           <button class="btn ghost" id="btn-simulate">Simuler une proximité</button>
@@ -22,10 +43,10 @@
         <hr/>
         <h2>Règles d’or</h2>
         <div class="rules">
-          <div class="rule"><span class="num">1</span><b>Double accord</b><br><small>Les deux doivent dire “Oui” maintenant.</small></div>
-          <div class="rule"><span class="num">2</span><b>Pas de chat</b><br><small>On se parle en vrai, pas dans l’app.</small></div>
-          <div class="rule"><span class="num">3</span><b>Lieu public</b><br><small>Point de rencontre visible et fréquenté.</small></div>
-          <div class="rule"><span class="num">4</span><b>Respect</b><br><small>Vous pouvez refuser/partir à tout moment.</small></div>
+          <div class="rule"><div class="num">1</div><h3>Double accord</h3><p>Les deux disent “Oui” maintenant.</p></div>
+          <div class="rule"><div class="num">2</div><h3>Pas de chat</h3><p>On se parle en vrai, pas dans l’app.</p></div>
+          <div class="rule"><div class="num">3</div><h3>Lieu public</h3><p>Point de rencontre visible et fréquenté.</p></div>
+          <div class="rule"><div class="num">4</div><h3>Respect</h3><p>On peut refuser/partir à tout moment.</p></div>
         </div>
       </div>
     </div>
@@ -33,21 +54,21 @@
 
   <section class="card">
     <h2>Personne à proximité (démo)</h2>
-    <p class="badge-soft">Cette description est fournie par la personne détectée (≤ 300 mots).</p>
+    <p class="badge">Description fournie par la personne détectée (≤ 300 mots).</p>
     <div id="nearby-chips" style="margin:10px 0"></div>
     <p id="nearby-desc"><i>En attente d’une proximité…</i></p>
   </section>
 
   <section class="card">
     <h2>Point de rencontre (démo)</h2>
-    <p>Quand vous êtes deux à dire “Oui”, choisissez un lieu public proposé, puis <b>décrivez votre tenue</b> pour vous reconnaître (ex. “manteau rouge”).</p>
+    <p>Quand vous êtes deux à dire “Oui”, choisissez un lieu public, puis <b>décrivez votre tenue</b> pour vous reconnaître.</p>
     <div class="grid grid-2">
       <div>
-        <div class="row">
+        <div class="row" style="display:flex; gap:10px; flex-wrap:wrap">
           <button class="btn" id="btn-accept">Dire “Oui”</button>
           <button class="btn ghost" id="btn-decline">Pas maintenant</button>
         </div>
-        <p class="notice">Ces boutons n’apparaissent qu’en cas de proximité réelle (ici, démo).</p>
+        <p class="notice">Ces boutons n’apparaissent qu’en cas de proximité réelle (démo).</p>
       </div>
       <div class="card">
         <div id="meet-card"><p class="notice">En attente d’une proximité acceptée.</p></div>
@@ -55,4 +76,8 @@
     </div>
   </section>
 </main>
-<footer class='container'><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer><div id='toast' class='toast' role='status' aria-live='polite'></div><script src='app.js'></script></body></html>
+
+<footer class="container"><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body></html>

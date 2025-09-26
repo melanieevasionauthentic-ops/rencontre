@@ -1,4 +1,25 @@
-<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1'/><title>Profil • Serendi</title><link rel='icon' type='image/png' sizes='32x32' href='assets/favicon-32.png'><link rel='icon' type='image/png' sizes='16x16' href='assets/favicon-16.png'><link rel='apple-touch-icon' sizes='192x192' href='assets/icon-192.png'><link rel='manifest' href='site.webmanifest'><link rel='shortcut icon' href='assets/favicon.ico'><meta name='theme-color' content='#e879f9'><link rel='stylesheet' href='assets/style.css'/></head><body><header class='nav container'><div class='brand'><svg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg' aria-hidden='true'><circle cx='7' cy='12' r='4' stroke='white' stroke-width='2'/><circle cx='17' cy='12' r='4' stroke='white' stroke-width='2'/><path d='M11 12h2' stroke='white' stroke-width='2' stroke-linecap='round'/></svg><span>Serendi</span><span class='badge'>Prototype</span></div><nav class='row' aria-label='Navigation principale'><a href='index.html'>Radar</a><a href='onboarding.html'>Profil</a><a href='settings.html'>Réglages</a><a href='safety.html'>Sûreté</a><a href='privacy.html'>Vie privée</a></nav></header>
+<!doctype html><html lang='fr'><head><meta charset='utf-8'/><meta name='viewport' content='width=device-width, initial-scale=1'/><title>Profil • Serendi</title>
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="192x192" href="assets/icon-192.png">
+<link rel="manifest" href="site.webmanifest">
+<link rel="shortcut icon" href="assets/favicon.ico">
+<meta name="theme-color" content="#e879f9">
+<link rel='stylesheet' href='assets/style.css'/></head><body>
+<header class="nav container">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Serendi</span>
+    <span class="badge">Prototype</span>
+  </div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="safety.html">Sûreté</a><a href="privacy.html">Vie privée</a>
+  </nav>
+</header>
+
 <main class="container grid">
   <section class="card">
     <h1>Créer mon profil</h1>
@@ -22,10 +43,10 @@
         <h2>Ce que je recherche</h2>
         <label>Genre(s)</label>
         <div class="grid grid-2">
-          <label><input type="checkbox" id="seek_women"> Femmes</label>
-          <label><input type="checkbox" id="seek_men"> Hommes</label>
-          <label><input type="checkbox" id="seek_nb"> Personnes non binaires</label>
-          <label><input type="checkbox" id="seek_trans"> Personnes trans</label>
+          <label class="check"><input type="checkbox" id="seek_women"><span>Femmes</span></label>
+          <label class="check"><input type="checkbox" id="seek_men"><span>Hommes</span></label>
+          <label class="check"><input type="checkbox" id="seek_nb"><span>Personnes non binaires</span></label>
+          <label class="check"><input type="checkbox" id="seek_trans"><span>Personnes trans</span></label>
         </div>
         <label>Orientation(s) (optionnel)</label>
         <select id="orientation" multiple>
@@ -34,20 +55,12 @@
           <option>Hétéro</option><option>Autre / Préfère ne pas dire</option>
         </select>
         <div class="grid grid-2">
-          <div>
-            <label>Âge min.</label><input id="want_age_min" type="number" min="18" max="120" placeholder="Ex. 25"/>
-          </div>
-          <div>
-            <label>Âge max.</label><input id="want_age_max" type="number" min="18" max="120" placeholder="Ex. 35"/>
-          </div>
+          <div><label>Âge min.</label><input id="want_age_min" type="number" min="18" max="120" placeholder="Ex. 25"/></div>
+          <div><label>Âge max.</label><input id="want_age_max" type="number" min="18" max="120" placeholder="Ex. 35"/></div>
         </div>
         <div class="grid grid-2">
-          <div>
-            <label>Taille min. (cm)</label><input id="want_h_min" type="number" min="120" max="250" placeholder="Ex. 160"/>
-          </div>
-          <div>
-            <label>Taille max. (cm)</label><input id="want_h_max" type="number" min="120" max="250" placeholder="Ex. 190"/>
-          </div>
+          <div><label>Taille min. (cm)</label><input id="want_h_min" type="number" min="120" max="250" placeholder="Ex. 160"/></div>
+          <div><label>Taille max. (cm)</label><input id="want_h_max" type="number" min="120" max="250" placeholder="Ex. 190"/></div>
         </div>
         <label>Cheveux souhaités (laisser vide = ouvert)</label>
         <select id="want_hair" multiple>
@@ -58,10 +71,10 @@
           <option>Sportif(ve)</option><option>Mince</option><option>Normal</option><option>Avec formes</option><option>Grand(e)</option><option>Autre</option>
         </select>
         <div class="grid grid-2">
-          <label><input type="checkbox" id="want_same_religion"> Même religion (optionnel)</label>
-          <label><input type="checkbox" id="want_same_diet"> Même régime (optionnel)</label>
+          <label class="check"><input type="checkbox" id="want_same_religion"><span>Même religion (optionnel)</span></label>
+          <label class="check"><input type="checkbox" id="want_same_diet"><span>Même régime (optionnel)</span></label>
         </div>
-        <div class="row" style="margin-top:12px">
+        <div class="row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
           <button class="btn" id="btn-save-profile">Enregistrer</button>
           <a class="btn ghost" href="index.html">Retour</a>
         </div>
@@ -70,4 +83,8 @@
     </div>
   </section>
 </main>
-<footer class='container'><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer><div id='toast' class='toast' role='status' aria-live='polite'></div><script src='app.js'></script></body></html>
+
+<footer class="container"><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+</body></html>
