@@ -13,30 +13,28 @@
       <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
     </svg>
     <span>Serendi</span>
-    <span class="badge">Prototype</span>
   </div>
   <nav class="row" aria-label="Navigation principale">
-    <a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="safety.html">Sûreté</a><a href="privacy.html">Vie privée</a>
+    <a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="safety.html">Sûreté</a><a href="privacy.html">Vie privée</a><a href="auth.html">Compte</a>
   </nav>
 </header>
 
 <main class="container grid">
   <section class="card">
     <h1>Radar de proximité</h1>
-    <p>Rencontres spontanées, sans photo ni chat. Active <b>Disponible</b>, et quand quelqu’un de compatible est proche, on vous le signale.</p>
+    <p>Rencontres spontanées, sans photo ni chat. Active <b>Disponible</b> : quand quelqu’un de compatible est proche, on te le signale.</p>
     <div class="grid grid-2" style="align-items:start">
       <div>
-        <div class="map" aria-label="Carte simplifiée">Carte simplifiée (démo)</div>
+        <div class="map" aria-label="Carte">Carte simplifiée</div>
         <div class="row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
           <button class="btn" id="btn-available">Disponible (60 min)</button>
           <button class="btn alt" id="btn-stealth">Mettre en pause (3 h)</button>
-          <button class="btn ghost" id="btn-simulate">Simuler une proximité</button>
         </div>
         <small>“Mettre en pause” coupe les notifications pendant 3 heures.</small>
       </div>
       <div class="card">
-        <h2>Mon résumé (démo)</h2>
-        <div id="profile-summary"><small>Aucun profil sauvegardé pour l’instant.</small></div>
+        <h2>Mon résumé</h2>
+        <div id="profile-summary"><small>Crée ou complète ton profil.</small></div>
         <hr/>
         <h2>Proximités</h2>
         <p id="prox-count" class="kpi">
@@ -55,14 +53,14 @@
   </section>
 
   <section class="card">
-    <h2>Personne à proximité (démo)</h2>
-    <p class="badge">Description fournie par la personne détectée (≤ 300 mots).</p>
+    <h2>Personne à proximité</h2>
+    <p class="badge">La description affichée vient directement de la personne détectée (≤ 300 mots).</p>
     <div id="nearby-chips" style="margin:10px 0"></div>
     <p id="nearby-desc"><i>En attente d’une proximité…</i></p>
   </section>
 
   <section class="card">
-    <h2>Point de rencontre (démo)</h2>
+    <h2>Point de rencontre</h2>
     <p>Quand vous êtes deux à dire “Oui”, choisissez un lieu public, puis <b>décrivez votre tenue</b> pour vous reconnaître.</p>
     <div class="grid grid-2">
       <div>
@@ -70,7 +68,6 @@
           <button class="btn" id="btn-accept">Dire “Oui”</button>
           <button class="btn ghost" id="btn-decline">Pas maintenant</button>
         </div>
-        <p class="notice">Ces boutons n’apparaissent qu’en cas de proximité réelle (démo).</p>
       </div>
       <div class="card">
         <div id="meet-card"><p class="notice">En attente d’une proximité acceptée.</p></div>
@@ -79,7 +76,7 @@
   </section>
 </main>
 
-<footer class="container"><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer>
+<footer class="container"><div>© 2025 Serendi. Données stockées localement ou via votre compte.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 </body></html>

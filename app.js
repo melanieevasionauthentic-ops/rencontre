@@ -60,7 +60,7 @@ const clearAll = () => { localStorage.clear(); toast('Données locales effacées
 
 // ---- Radar demo + matching (same as v2)
 let disponible = false, proxCount = 0;
-const setDisponible = (on) => { disponible = on; toast(on ? 'Vous êtes disponible pendant 60 min (démo).' : 'Indisponible.'); };
+const setDisponible = (on) => { disponible = on; toast(on ? 'Vous êtes disponible pendant 60 min.' : 'Indisponible.'); };
 const HAIRS = ["Châtains","Bruns","Blonds","Roux","Noirs","Autre"];
 const BODIES = ["Sportif(ve)","Mince","Normal","Avec formes","Grand(e)","Autre"];
 const GENDERS = ["Femmes","Hommes","Non binaires","Trans"];
@@ -85,15 +85,15 @@ const simulateProximity = () => {
     || (seeks.men && candidate.gender==="Hommes")
     || (seeks.nb && candidate.gender==="Non binaires")
     || (seeks.trans && candidate.gender==="Trans");
-  if(!gendersOk){ toast("Quelqu’un est proche, mais hors de vos genres recherchés (démo)."); return; }
+  if(!gendersOk){ toast("Quelqu’un est proche, mais hors de vos genres recherchés."); return; }
 
   const want = me.want || {};
-  if(!inRange(candidate.age, want.age||[null,null])) { toast("Proche mais âge hors de vos critères (démo)."); return; }
-  if(!inRange(candidate.height, want.height||[null,null])) { toast("Proche mais taille hors de vos critères (démo)."); return; }
-  if(!setOk(candidate.hair, want.hair)) { toast("Proche mais cheveux hors de vos critères (démo)."); return; }
-  if(!setOk(candidate.body, want.body)) { toast("Proche mais type de corps hors de vos critères (démo)."); return; }
+  if(!inRange(candidate.age, want.age||[null,null])) { toast("Proche mais âge hors de vos critères."); return; }
+  if(!inRange(candidate.height, want.height||[null,null])) { toast("Proche mais taille hors de vos critères."); return; }
+  if(!setOk(candidate.hair, want.hair)) { toast("Proche mais cheveux hors de vos critères."); return; }
+  if(!setOk(candidate.body, want.body)) { toast("Proche mais type de corps hors de vos critères."); return; }
   if((want.same_religion && me.religion && candidate.religion !== me.religion)
-    || (want.same_diet && me.diet && candidate.diet !== me.diet)) { toast("Proche mais préférences religieuses/alimentaires différentes (démo)."); return; }
+    || (want.same_diet && me.diet && candidate.diet !== me.diet)) { toast("Proche mais préférences religieuses/alimentaires différentes."); return; }
 
   proxCount += 1; const el = $('#prox-count .v'); if (el) el.textContent = String(proxCount);
   const chips = [`<chip>${candidate.gender}</chip>`,`<chip>Âge ${candidate.age}</chip>`,`<chip>${candidate.height} cm</chip>`,`<chip>Cheveux ${candidate.hair}</chip>`,`<chip>Corps ${candidate.body}</chip>`];
@@ -126,7 +126,7 @@ const accepter = () => {
   toast('Rencontre prête. Ajoutez votre description.');
 };
 const refuser = () => { $('#meet-card').innerHTML = '<p class="notice">Invitation refusée. À une prochaine fois.</p>'; };
-const partagerDesc = () => { const v = ($('#desc-tenue')?.value||'').trim(); if(!v){ toast('Ajoutez une courte description.'); return; } $('#desc-status').innerHTML = `Description partagée : <b>${v}</b>. En attente… (démo)`; toast('Description envoyée (démo).'); };
+const partagerDesc = () => { const v = ($('#desc-tenue')?.value||'').trim(); if(!v){ toast('Ajoutez une courte description.'); return; } $('#desc-status').innerHTML = `Description partagée : <b>${v}</b>. En attente…`; toast('Description envoyée.'); };
 const panic = () => { const url = 'sms:?&body=' + encodeURIComponent('Besoin d’un check-in. Je suis à un rendez-vous. Tout va bien ?'); location.href = url; };
 
 // ---- UI
@@ -161,8 +161,8 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   // Radar/rencontre
   $('#btn-available')?.addEventListener('click', () => setDisponible(!disponible));
-  $('#btn-stealth')?.addEventListener('click', () => { setDisponible(false); toast('Pause activée 3 h (démo).'); });
-  $('#btn-simulate')?.addEventListener('click', simulateProximity);
+  $('#btn-stealth')?.addEventListener('click', () => { setDisponible(false); toast('Pause activée 3 h.'); });
+  
   $('#btn-accept')?.addEventListener('click', accepter);
   $('#btn-decline')?.addEventListener('click', refuser);
   // Sûreté
@@ -170,19 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSummary();
 });
 
-
-// --- v3.1: show chosen radius on index and use it in toasts
+// Affichage du rayon choisi
 const getRadius = () => { try { const s = JSON.parse(localStorage.getItem('settings')||'{}'); return s.radius || 100; } catch(e){ return 100; } };
 const applyRadius = () => { const r = getRadius(); const el = document.getElementById('radius-display'); if (el) el.textContent = String(r); };
 document.addEventListener('DOMContentLoaded', applyRadius);
-
-// Patch simulateProximity toast to include radius
-const _simulateProximity_orig = simulateProximity;
-simulateProximity = () => {
-  const r = getRadius();
-  // temporarily intercept toast to add radius
-  const _toast = toast;
-  toast = (msg) => { _toast(msg.replace('(~100 m)', `(~${r} m)`)); };
-  _simulateProximity_orig();
-  toast = _toast;
-};

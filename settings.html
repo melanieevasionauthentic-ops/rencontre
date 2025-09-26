@@ -13,6 +13,19 @@
       <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
     </svg>
     <span>Serendi</span>
+  </div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="safety.html">Sûreté</a><a href="privacy.html">Vie privée</a><a href="auth.html">Compte</a>
+  </nav>
+</header>
+
+<header class="nav container">
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+      <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <span>Serendi</span>
     <span class="badge">Prototype</span>
   </div>
   <nav class="row" aria-label="Navigation principale">
@@ -28,7 +41,7 @@
         <label>Heures calmes (pas de notifications)</label><input id="quiet" placeholder="22:00–08:00"/>
         <label>Rayon (démo)</label><select id="radius"><option value="100">~100 m</option><option value="150">~150 m</option><option value="300">~300 m</option></select>
         <div class="row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
-          <button class="btn" id="btn-save-settings">Enregistrer les réglages</button>
+          <button class="btn" id="btn-save-settings">Enregistrer</button>
           <button class="btn ghost" id="btn-clear">Effacer les données locales</button>
         </div>
       </div>
@@ -42,6 +55,10 @@
 </main>
 
 <footer class="container"><div>© 2025 Serendi • Prototype statique. Données stockées localement.</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="app.js"></script>
+
+<footer class="container"><div>© 2025 Serendi. Données stockées localement ou via votre compte.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script src="app.js"></script>
 </body></html>
