@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Compte • Serendi</title>
+  <link rel="stylesheet" href="assets/style.css"/>
+  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script defer src="auth.js"></script>
+</head>
+<body>
+  <header class="nav container">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="7" cy="12" r="4" stroke="white" stroke-width="2"/><circle cx="17" cy="12" r="4" stroke="white" stroke-width="2"/>
+        <path d="M11 12h2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Serendi</span>
+      <span class="badge">Compte</span>
+    </div>
+    <nav><a href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a></nav>
+  </header>
+  <main class="container grid">
+    <section class="card">
+      <h1>Créer mon compte</h1>
+      <p>Entre ton email. Tu recevras un lien magique. Pas de mot de passe.</p>
+      <label>Email</label>
+      <input id="email" type="email" placeholder="toi@exemple.com"/>
+      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn" id="btn-login">Recevoir le lien</button>
+        <button class="btn ghost" id="btn-logout">Se déconnecter</button>
+      </div>
+      <p id="auth-status"></p>
+    </section>
+  </main>
+</body>
+</html>
