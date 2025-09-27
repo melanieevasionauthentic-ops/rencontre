@@ -165,7 +165,26 @@ function formatDesc(p){ return (p.bio_short||'—').replace(/\n/g,'<br>'); }
 async function fetchNearby(){
   if(!sb || me.lat==null) return;
   const res = await sb.from('presence').select('id,lat,lon,radius_m,bio_short,updated_at,expires_at').gt('expires_at', new Date().toISOString()).order('updated_at', { ascending:false }).limit(300);
-  const { data, error } = res; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
+  const { data, error } = res // --- Déduplication légère par nom + proximité (~30 m)
+function bucket(v){ return Math.round(v * 4000) / 4000; } // ~27 m
+const byKey = new Map();
+
+(data || []).forEach(p => {
+  // Nom/Pseudo depuis la 1re ligne du bio_short
+  const m = (p.bio_short || '').match(/Nom\/Pseudo:\s*(.*)/);
+  const name = m ? m[1].split('\n')[0].trim() : '';
+  const k = `${name}|${bucket(p.lat)}|${bucket(p.lon)}`;
+
+  const prev = byKey.get(k);
+  const prevTs = prev ? new Date(prev.updated_at || prev.expires_at || 0).getTime() : -1;
+  const curTs  = new Date(p.updated_at || p.expires_at || 0).getTime();
+
+  if (!prev || curTs > prevTs) byKey.set(k, p);
+});
+
+// Remplace la liste brute par la liste dédupliquée
+const deduped = Array.from(byKey.values());
+; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
   const r = getRadius();
   const inRange = (data||[]).filter(p => distM(me.lat, me.lon, p.lat, p.lon) <= Math.min(r, p.radius_m));
   const newIds = (inRange || []).map(p=>p.id).filter(id => !seenInRange.has(id));
