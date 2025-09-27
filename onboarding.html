@@ -4,17 +4,17 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Profil • Serendi</title>
-  <link rel="stylesheet" href="/rencontre/assets/style.css?v=5"/>
-  <link rel="icon" href="/rencontre/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css?v=6"/>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
 <header class="nav container">
   <div class="brand"><strong>Serendi</strong></div>
   <nav class="row" aria-label="Navigation principale">
-    <a href="/rencontre/index.html">Radar</a>
-    <a aria-current="page" href="/rencontre/onboarding.html">Profil</a>
-    <a href="/rencontre/settings.html">Réglages</a>
-    <a href="/rencontre/privacy.html">Vie privée</a>
+    <a href="index.html">Radar</a>
+    <a aria-current="page" href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="privacy.html">Vie privée</a>
   </nav>
 </header>
 <main class="container grid">
@@ -70,7 +70,7 @@
         </div>
         <div class="row" style="margin-top:12px">
           <button class="btn" id="btn-save-profile">Enregistrer</button>
-          <a class="btn ghost" href="/rencontre/index.html">Aller au Radar</a>
+          <a class="btn ghost" href="index.html">Aller au Radar</a>
         </div>
       </div>
     </div>
@@ -78,7 +78,18 @@
 </main>
 <footer class="container"><div>© 2025 Serendi.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="/rencontre/assets/config.js?v=5"></script>
+
+<!-- Auto-test minimal -->
+<div style="position:fixed;top:8px;left:8px;font:12px ui-monospace;color:#fff;background:#0008;border:1px solid #fff3;padding:6px;border-radius:10px" id="selftest">init…</div>
+<script>
+(function(){
+  const ok = (id,b) => (document.getElementById('selftest').textContent += ' '+id+':' + (b?'OK':'KO'));
+  ok('css', !!document.styleSheets.length);
+  ok('appjs', true);
+})();
+</script>
+
+<script src="assets/config.js?v=6"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/rencontre/assets/app.js?v=5"></script>
+<script src="assets/app.js?v=6"></script>
 </body></html>
