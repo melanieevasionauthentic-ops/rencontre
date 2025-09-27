@@ -59,6 +59,30 @@
 <script src="/rencontre/assets/config.js?v=3"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/rencontre/assets/app.js?v=3"></script>
+<!-- Fallback carte: s'exécute même si app.js n'a pas réussi -->
+<script>
+(function(){
+  try{
+    var box = document.getElementById('map');
+    if (!box) return;
+    if (typeof L === 'undefined') {  // Leaflet pas chargé
+      var s = document.createElement('script');
+      s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      s.onload = init;
+      document.body.appendChild(s);
+    } else {
+      init();
+    }
+    function init(){
+      if (box._serendi_done) return;
+      var m = L.map('map');
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(m);
+      m.setView([48.8566, 2.3522], 13); // Paris par défaut
+      box._serendi_done = true;
+    }
+  }catch(e){}
+})();
+</script>
 
 </body>
 </html>
