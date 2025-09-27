@@ -16,6 +16,7 @@ function saveProfile(){
   const checked = (sel)=>document.querySelector(sel)?.checked || false;
   const multi = (sel)=>Array.from(document.querySelector(sel)?.selectedOptions || []).map(o=>o.value);
   const data = {
+    display_name: val('#display_name') || '',
     my_gender: val('#my_gender'), my_orientation: multi('#my_orientation'),
     age: num('#age'), height: num('#height'), hair: val('#hair'), body: val('#body'),
     religion: val('#religion'), diet: val('#diet'),
@@ -30,7 +31,7 @@ function saveProfile(){
 }
 function renderSummary(){
   const el = $('#profile-summary'); if(!el) return;
-  const p = readProfile(); const chips = [];
+  const p = readProfile(); const chips = []; if (p.display_name) chips.push(`<chip>${p.display_name}</chip>`);
   if (p.my_gender) chips.push(`<chip>Genre ${p.my_gender}</chip>`);
   if (p.my_orientation && p.my_orientation.length) chips.push(`<chip>Orientation ${p.my_orientation.join(', ')}</chip>`);
   if (p.age) chips.push(`<chip>Âge ${p.age}</chip>`);
@@ -107,16 +108,11 @@ function updateAvailabilityUI(){
 }
 // Beep joyful once per new id
 let seenInRange = new Set(JSON.parse(localStorage.getItem('seen_inrange') || '[]'));
-function rememberSeen(ids) {
-  ids.forEach(id => seenInRange.add(id));
-  localStorage.setItem('seen_inrange', JSON.stringify(Array.from(seenInRange)));
-}
+function rememberSeen(ids) { ids.forEach(id => seenInRange.add(id)); localStorage.setItem('seen_inrange', JSON.stringify(Array.from(seenInRange))); }
 function beepJoy(){
   try {
     const ctx = new (window.AudioContext||window.webkitAudioContext)();
-    const master = ctx.createGain();
-    master.gain.value = 0.08;
-    master.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = 0.08; master.connect(ctx.destination);
     [440, 554.37, 659.25].forEach((f, i)=>{
       const o = ctx.createOscillator(); const g = ctx.createGain();
       o.type = 'sine'; o.frequency.setValueAtTime(f, ctx.currentTime + i*0.01);
@@ -130,16 +126,13 @@ function beepJoy(){
 
 // Supabase radar
 const cfg = window.SERENDI_CFG || {}; let sb = null;
-if (window.supabase && cfg.SUPABASE_URL && cfg.SUPABASE_ANON){
-  sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON);
-}
+if (window.supabase && cfg.SUPABASE_URL && cfg.SUPABASE_ANON){ sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON); }
 function distM(lat1, lon1, lat2, lon2){
   const R=6371000, toRad=d=>d*Math.PI/180;
   const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
-  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*sin2(dLon/2);
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
   return 2*R*Math.asin(Math.sqrt(a));
 }
-const sin2 = (x)=>Math.sin(x)*Math.sin(x);
 let me = { lat:null, lon:null };
 
 async function pingPresence(){
@@ -148,7 +141,8 @@ async function pingPresence(){
   const p = readProfile();
   const bio = (p.bio || '').slice(0, 1200);
   const rec = (p.recognize || '').slice(0, 200);
-  const bioShort = rec ? `${bio}\nReconnaître: ${rec}` : bio;
+  const nameLine = (p.display_name||'').trim();
+  const bioShort = (nameLine? `Nom/Pseudo: ${nameLine}\n`:'') + bio + (rec? `\nReconnaître: ${rec}`:'');  
   const exp = new Date(Date.now() + 60*60*1000).toISOString(); // 60 min
   const ins = await sb.from('presence').insert({ lat: me.lat, lon: me.lon, radius_m: radius, bio_short: bioShort, expires_at: exp });
   if(ins.error){ console.error(ins.error); toast('Erreur envoi présence'); }
@@ -156,11 +150,7 @@ async function pingPresence(){
 function formatDesc(p){ return (p.bio_short||'—').replace(/\n/g,'<br>'); }
 async function fetchNearby(){
   if(!sb || me.lat==null) return;
-  const res = await sb.from('presence')
-    .select('id,lat,lon,radius_m,bio_short,updated_at,expires_at')
-    .gt('expires_at', new Date().toISOString())
-    .order('updated_at', { ascending:false })
-    .limit(300);
+  const res = await sb.from('presence').select('id,lat,lon,radius_m,bio_short,updated_at,expires_at').gt('expires_at', new Date().toISOString()).order('updated_at', { ascending:false }).limit(300);
   const { data, error } = res; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
   const r = getRadius();
   const inRange = (data||[]).filter(p => distM(me.lat, me.lon, p.lat, p.lon) <= Math.min(r, p.radius_m));
@@ -173,25 +163,31 @@ async function fetchNearby(){
     (data||[]).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius:5, opacity:0.6, fillOpacity:0.3 }); m.addTo(map).bindPopup(formatDesc(p)); othersLayers.push(m); });
     (inRange||[]).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius:7, opacity:1, fillOpacity:0.6 }); m.addTo(map).bindPopup(formatDesc(p)); othersLayers.push(m); });
   }
-  // Build list
-  const listEl = document.getElementById('nearby-list');
-  if(listEl){
-    listEl.innerHTML = (inRange||[]).length ? (inRange||[]).map((p,i)=>`<button class="near-item" data-i="${i}">👋 Voir la fiche #${i+1}</button>`).join(' ') : '<small>Aucun proche.</small>';
-    listEl.querySelectorAll('.near-item').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const i = Number(btn.getAttribute('data-i'));
-        const p = (inRange||[])[i];
-        if(p && map) L.popup().setLatLng([p.lat,p.lon]).setContent(formatDesc(p)).openOn(map);
-        if(descEl) descEl.innerHTML = formatDesc(p||{});
-      });
+  // Dropdown of nearby
+  const sel = document.getElementById('nearby-select');
+  if (sel){
+    const options = (inRange||[]).map((p,i)=>{
+      const nameMatch = (p.bio_short||'').match(/Nom\/Pseudo:\s*(.*)/);
+      const name = nameMatch ? nameMatch[1].split('\\n')[0].trim() : `#${i+1}`;
+      return `<option value="${i}">${name}</option>`;
     });
+    sel.innerHTML = options.length ? `<option value="" disabled selected>— choisir —</option>` + options.join('') : `<option value="" disabled>Aucun proche</option>`;
+    sel.onchange = ()=>{
+      const i = Number(sel.value);
+      const p = (inRange||[])[i];
+      if (p){
+        if (map) L.popup().setLatLng([p.lat,p.lon]).setContent(formatDesc(p)).openOn(map);
+        if (descEl) descEl.innerHTML = formatDesc(p);
+        window._lastSelectedPresence = p;
+      }
+    };
   }
 }
 function startRadarLoops(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((pos)=>{ me.lat=pos.coords.latitude; me.lon=pos.coords.longitude; }, ()=>{}, { enableHighAccuracy:true });
   }
-  setInterval(fetchNearby, 10000); // écoute permanente
+  setInterval(fetchNearby, 10000);
   setInterval(()=>{ if(isAvailable()) pingPresence(); updateAvailabilityUI(); }, 5*60*1000);
 }
 
@@ -201,8 +197,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
   const s = readSettings(); if($('#quiet') && s.quiet) $('#quiet').value = s.quiet; if($('#radius') && s.radius) $('#radius').value = String(s.radius);
   $('#btn-save-settings')?.addEventListener('click', (e)=>{ e.preventDefault(); writeSettings({ quiet:($('#quiet')?.value||''), radius:Number($('#radius')?.value)||1000 }); applyRadius(); initMap(); toast('Réglages enregistrés.'); });
   applyRadius(); initMap(); updateAvailabilityUI();
-  $('#btn-panic')?.addEventListener('click', panic);
   document.getElementById('btn-available')?.addEventListener('click', async ()=>{ if(isAvailable()){ clearAvailable(); toast('Vous n’êtes plus visible.'); } else { setAvailable(60); toast('Vous êtes visible pendant ~60 min.'); await fetchNearby(); } });
   document.getElementById('btn-stealth')?.addEventListener('click', ()=>{ writeFlag('mute_until', Date.now() + 3*60*60*1000); toast('Notifications en pause ~3h.'); });
+  // request button
+  const btnReq = document.getElementById('btn-request');
+  if(btnReq){
+    btnReq.onclick = async ()=>{
+      const meName = (readProfile().display_name||'').trim() || 'Anonyme';
+      const p = window._lastSelectedPresence;
+      if(!p){ toast('Choisis d’abord une personne.'); return; }
+      if(!sb){ toast('Connexion absente.'); return; }
+      try{
+        const r = await sb.from('intents').insert({ target_presence_id: p.id, from_name: meName, created_at: new Date().toISOString() });
+        if(r.error){
+          console.warn('intents insert error:', r.error);
+          toast('Demande envoyée localement. (Active “intents.sql” dans Supabase pour la synchro.)');
+          const loc = JSON.parse(localStorage.getItem('intents')||'[]'); loc.push({ target_presence_id: p.id, from_name: meName, at: Date.now() });
+          localStorage.setItem('intents', JSON.stringify(loc));
+        } else {
+          toast('Demande envoyée ✔');
+        }
+      }catch(e){ console.error(e); toast('Demande enregistrée localement. (Voir intents.sql)'); }
+    };
+  }
   startRadarLoops();
 });

@@ -22,4 +22,6 @@ select[multiple]{min-height:120px}
 .mapbox{height:320px;border-radius:14px;border:1px solid rgba(255,255,255,.18);overflow:hidden}
 .near-item{padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:#231033;color:#fff;cursor:pointer;font-weight:600}
 .near-item:hover{filter:brightness(1.1)}
+.check{ display:flex; align-items:center; gap:12px; padding:10px; margin:8px 0; border-radius:10px; border:1px solid var(--edge); background:#231033 }
+.check input{ width:18px; height:18px; accent-color:#e879f9 }
 @media (max-width: 480px) {.container { padding: 16px; }.mapbox { height: 280px; }.btn { width: 100%; }.row { gap: 12px !important; }}
