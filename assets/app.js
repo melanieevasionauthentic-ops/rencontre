@@ -15,7 +15,7 @@ function saveProfile(){
   const num = (sel)=>{ const v = Number(document.querySelector(sel)?.value); return isFinite(v) ? v : null; };
   const checked = (sel)=>document.querySelector(sel)?.checked || false;
   const multi = (sel)=>Array.from(document.querySelector(sel)?.selectedOptions || []).map(o=>o.value);
-  const data = {
+  const data = { my_gender: val('#my_gender'), my_orientation: multi('#my_orientation'), 
     age: num('#age'), height: num('#height'), hair: val('#hair'), body: val('#body'),
     religion: val('#religion'), diet: val('#diet'),
     bio: (val('#bio')||'').slice(0,2400),
@@ -33,6 +33,8 @@ function renderSummary(){
   if (p.hair) chips.push(`<chip>Cheveux ${p.hair}</chip>`);
   if (p.body) chips.push(`<chip>Corps ${p.body}</chip>`);
   if (p.religion) chips.push(`<chip>Religion ${p.religion}</chip>`);
+  if (p.my_gender) chips.push(`<chip>Genre ${p.my_gender}</chip>`);
+  if (p.my_orientation && p.my_orientation.length) chips.push(`<chip>Orientation ${p.my_orientation.join(', ')}</chip>`);
   if (p.diet) chips.push(`<chip>Régime ${p.diet}</chip>`);
   const lst=[]; const s=p.seek||{};
   if (s.women) lst.push('Femmes'); if (s.men) lst.push('Hommes'); if (s.nb) lst.push('Non binaires'); if (s.trans) lst.push('Trans');
@@ -116,8 +118,8 @@ function startRadarLoops(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((pos)=>{ me.lat=pos.coords.latitude; me.lon=pos.coords.longitude; }, ()=>{}, { enableHighAccuracy:true });
   }
-  setInterval(pingPresence, 120000);
-  setInterval(fetchNearby, 15000);
+  setInterval(pingPresence, 60000); // 60s pour tests
+  setInterval(fetchNearby, 8000); // 8s pour tests
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -127,5 +129,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
   $('#btn-save-settings')?.addEventListener('click', (e)=>{ e.preventDefault(); writeSettings({ quiet:($('#quiet')?.value||''), radius:Number($('#radius')?.value)||100 }); applyRadius(); initMap(); toast('Réglages enregistrés.'); });
   applyRadius(); initMap();
   $('#btn-panic')?.addEventListener('click', panic);
+  // Disponibilité: ping immédiat + rafraîchissement
+  $('#btn-available')?.addEventListener('click', async ()=>{ await pingPresence(); await fetchNearby(); toast('Tu es visible pendant ~10 min.'); });
+  $('#btn-stealth')?.addEventListener('click', ()=>{ toast('Pause notifications (démo).'); });
+
   startRadarLoops();
 });
