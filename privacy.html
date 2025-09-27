@@ -1,8 +1,37 @@
----
-layout: default
-title: Vie privée
----
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Vie privée • Serendi</title>
+  <link rel="stylesheet" href="assets/style.css?v=20250928a"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <meta name="theme-color" content="#e879f9">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<header class="nav container">
+  <div class="brand"><strong>Serendi</strong></div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="./index.html">Radar</a>
+    <a href="./onboarding.html">Profil</a>
+    <a href="./settings.html">Réglages</a>
+    <a href="./privacy.html">Vie privée</a>
+  </nav>
+</header>
+<main class="container grid">
+
 <section class="card">
   <h1>Vie privée</h1>
   <p>Données minimales. Par défaut, tout reste <b>sur ton appareil</b>. Pour le radar, seules des “présences” temporaires (lat/lon/rayon/description courte) sont stockées 60 minutes.</p>
 </section>
+
+</main>
+<footer class="container"><div>© 2025 Serendi.</div></footer>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<script src="assets/config.js?v=20250928a"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js?v=20250928a"></script>
+</body>
+</html>
