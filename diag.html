@@ -1,0 +1,38 @@
+---
+layout: default
+title: Diagnostic
+---
+<section class="card">
+  <h1>Diagnostic Supabase</h1>
+  <p>URL: <code id="u"></code></p>
+  <p>Anon: <code id="k"></code></p>
+  <div class="row" style="display:flex; gap:10px; flex-wrap:wrap">
+    <button class="btn" id="btn-test-insert">Test insert</button>
+    <button class="btn" id="btn-test-select">Test select</button>
+  </div>
+  <pre id="out" style="background:#231033;padding:12px;border-radius:12px;overflow:auto;max-height:260px"></pre>
+</section>
+<script>
+const out = (m)=>{document.getElementById('out').textContent += m + "\n";};
+document.addEventListener('DOMContentLoaded', ()=>{
+  const cfg = window.SERENDI_CFG || {};
+  document.getElementById('u').textContent = cfg.SUPABASE_URL || '(vide)';
+  document.getElementById('k').textContent = (cfg.SUPABASE_ANON||'(vide)').slice(0,12)+'...';
+  if(window.supabase && cfg.SUPABASE_URL && cfg.SUPABASE_ANON){
+    window.sb = window.supabase.createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON);
+  } else { out('Supabase non initialisé'); }
+  document.getElementById('btn-test-insert').addEventListener('click', async ()=>{
+    try{
+      const exp = new Date(Date.now() + 60*60*1000).toISOString();
+      const ins = await sb.from('presence').insert({ lat:48.8566, lon:2.3522, radius_m:300, bio_short:'test-diag', expires_at:exp });
+      out('insert: ' + JSON.stringify(ins, null, 2));
+    }catch(e){ out('insert exception: ' + e.message); }
+  });
+  document.getElementById('btn-test-select').addEventListener('click', async ()=>{
+    try{
+      const sel = await sb.from('presence').select('lat,lon,radius_m,bio_short,updated_at,expires_at').order('updated_at',{ascending:false}).limit(5);
+      out('select: ' + JSON.stringify(sel, null, 2));
+    }catch(e){ out('select exception: ' + e.message); }
+  });
+});
+</script>
