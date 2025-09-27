@@ -1,0 +1,50 @@
+<!doctype html><meta charset="utf-8">
+<title>Diag Serendi</title>
+<link rel="stylesheet" href="assets/style.css">
+<div class="container card"><h1>Diagnostic</h1>
+  <p id="assets"></p>
+  <p id="supabase"></p>
+  <p id="geo"></p>
+  <p id="storage"></p>
+  <div id="map" class="mapbox" style="height:260px"></div>
+</div>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="assets/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(async function(){
+  // 1) Assets chargés ?
+  const a = document.getElementById('assets');
+  a.textContent = 'Assets OK : style/config chargés.';
+  a.style.color = 'lime';
+
+  // 2) Supabase OK ?
+  try {
+    const sb = window.supabase.createClient(window.SERENDI_CFG.SUPABASE_URL, window.SERENDI_CFG.SUPABASE_ANON);
+    const { data, error, status } = await sb.from('presence').select('id').limit(1);
+    document.getElementById('supabase').textContent =
+      error ? ('Supabase ERREUR: ' + error.message) : ('Supabase OK (status ' + status + ')');
+  } catch(e){
+    document.getElementById('supabase').textContent = 'Supabase KO: ' + e.message;
+  }
+
+  // 3) localStorage OK ?
+  try { localStorage.setItem('diag','ok'); localStorage.removeItem('diag');
+    document.getElementById('storage').textContent = 'localStorage OK';
+  } catch(e){
+    document.getElementById('storage').textContent = 'localStorage KO: ' + e.message;
+  }
+
+  // 4) Carte Leaflet
+  try{
+    const map = L.map('map'); 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+    map.setView([48.8566, 2.3522], 13);
+    document.getElementById('geo').textContent = 'Carte Leaflet OK (vue Paris).';
+  }catch(e){
+    document.getElementById('geo').textContent = 'Carte KO: ' + e.message;
+  }
+})();
+</script>
