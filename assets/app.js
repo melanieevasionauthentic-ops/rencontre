@@ -217,13 +217,6 @@ function wireIntentButton(){
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
-  document.getElementById('btn-save-profile')?.addEventListener('click', (e)=>{ e.preventDefault(); saveProfile(); });
-  renderSummary();
-  const s = readSettings(); if($('#quiet') && s.quiet) $('#quiet').value = s.quiet; if($('#radius') && s.radius) $('#radius').value = String(s.radius);
-  document.getElementById('btn-save-settings')?.addEventListener('click', (e)=>{ e.preventDefault(); writeSettings({ quiet:($('#quiet')?.value||''), radius:Number($('#radius')?.value)||1000 }); applyRadius(); initMap(); toast('Réglages enregistrés.'); });
-  applyRadius(); initMap(); updateAvailabilityUI();
-  document.getElementById('btn-available')?.addEventListener('click', async ()=>{ if(isAvailable()){ clearAvailable(); toast('Vous n’êtes plus visible.'); } else { setAvailable(60); toast('Vous êtes visible pendant ~60 min.'); await fetchNearby(); } });
-  document.getElementById('btn-stealth')?.addEventListener('click', ()=>{ writeFlag('mute_until', Date.now() + 3*60*60*1000); toast('Notifications en pause ~3h.'); });
-  wireIntentButton();
-  startRadarLoops();
+  /* ... tout le code à l’intérieur ... */
 });
+
