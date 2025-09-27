@@ -142,7 +142,21 @@ async function pingPresence(){
   const bio = (p.bio || '').slice(0, 1200);
   const rec = (p.recognize || '').slice(0, 200);
   const nameLine = (p.display_name||'').trim();
-  const bioShort = (nameLine? `Nom/Pseudo: ${nameLine}\n`:'') + bio + (rec? `\nReconnaître: ${rec}`:'');  
+  const wantsList = []; const s = p.seek||{}; if (s.women) wantsList.push('Femmes'); if (s.men) wantsList.push('Hommes'); if (s.nb) wantsList.push('Non binaires'); if (s.trans) wantsList.push('Trans');
+  const lines = [];
+  if (nameLine) lines.push(`Nom/Pseudo: ${nameLine}`);
+  if (p.age) lines.push(`Âge: ${p.age}`);
+  if (p.height) lines.push(`Taille: ${p.height} cm`);
+  if (p.hair) lines.push(`Cheveux: ${p.hair}`);
+  if (p.body) lines.push(`Corps: ${p.body}`);
+  if (p.religion) lines.push(`Religion: ${p.religion}`);
+  if (p.diet) lines.push(`Régime: ${p.diet}`);
+  if (p.my_orientation && p.my_orientation.length) lines.push(`Orientation: ${p.my_orientation.join(', ')}`);
+  if (wantsList.length) lines.push(`Je recherche: ${wantsList.join(', ')}`);
+  if (p.relation_type) lines.push(`Type de relation: ${p.relation_type}`);
+  if (bio) lines.push(`À propos: ${bio}`);
+  if (rec) lines.push(`Reconnaître: ${rec}`);
+  const bioShort = lines.join('\n');  
   const exp = new Date(Date.now() + 60*60*1000).toISOString(); // 60 min
   const ins = await sb.from('presence').insert({ lat: me.lat, lon: me.lon, radius_m: radius, bio_short: bioShort, expires_at: exp });
   if(ins.error){ console.error(ins.error); toast('Erreur envoi présence'); }
