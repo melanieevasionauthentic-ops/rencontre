@@ -165,11 +165,11 @@ function formatDesc(p){ return (p.bio_short||'—').replace(/\n/g,'<br>'); }
 async function fetchNearby(){
   if(!sb || me.lat==null) return;
   const res = await sb.from('presence').select('id,lat,lon,radius_m,bio_short,updated_at,expires_at').gt('expires_at', new Date().toISOString()).order('updated_at', { ascending:false }).limit(300);
-  const { data, error } = res // --- Déduplication légère par nom + proximité (~30 m)
+  const { deduped, error } = res // --- Déduplication légère par nom + proximité (~30 m)
 function bucket(v){ return Math.round(v * 4000) / 4000; } // ~27 m
 const byKey = new Map();
 
-(data || []).forEach(p => {
+(deduped || []).forEach(p => {
   // Nom/Pseudo depuis la 1re ligne du bio_short
   const m = (p.bio_short || '').match(/Nom\/Pseudo:\s*(.*)/);
   const name = m ? m[1].split('\n')[0].trim() : '';
@@ -186,14 +186,14 @@ const byKey = new Map();
 const deduped = Array.from(byKey.values());
 ; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
   const r = getRadius();
-  const inRange = (data||[]).filter(p => distM(me.lat, me.lon, p.lat, p.lon) <= Math.min(r, p.radius_m));
+  const inRange = const inRange = (deduped||[]).filter(p => distM(me.lat, me.lon, p.lat, p.lon) <= Math.min(r, p.radius_m));
   const newIds = (inRange || []).map(p=>p.id).filter(id => !seenInRange.has(id));
   if (newIds.length && notifyAllowed()) { beepJoy(); if ('Notification' in window) { if (Notification.permission === 'granted'){ new Notification('Serendi', { body: 'Nouvelle personne à proximité' }); } else if (Notification.permission !== 'denied'){ Notification.requestPermission(()=>{}); } } rememberSeen(newIds); }
   const countEl = document.querySelector('.kpi .v'); if(countEl) countEl.textContent = String(inRange.length);
   const descEl = document.getElementById('nearby-desc'); if(descEl) descEl.innerHTML = (inRange[0]?.bio_short? formatDesc(inRange[0]) : "<i>En attente d’une proximité…</i>");
   if(typeof L!=='undefined' && map){
     othersLayers.forEach(m => map.removeLayer(m)); othersLayers = [];
-    (data||[]).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius:5, opacity:0.6, fillOpacity:0.3 }); m.addTo(map).bindPopup(formatDesc(p)); othersLayers.push(m); });
+    (deduped||[]).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius:5, opacity:0.6, fillOpacity:0.3 }); m.addTo(map).bindPopup(formatDesc(p)); othersLayers.push(m); });
     (inRange||[]).forEach(p => { const m = L.circleMarker([p.lat, p.lon], { radius:7, opacity:1, fillOpacity:0.6 }); m.addTo(map).bindPopup(formatDesc(p)); othersLayers.push(m); });
   }
   // Dropdown of nearby
