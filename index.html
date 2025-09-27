@@ -86,3 +86,24 @@
 
 </body>
 </html>
+<!-- Diag localStorage profil -->
+<script>
+(function(){
+  try{
+    var p = JSON.parse(localStorage.getItem('profile') || '{}');
+    var box = document.getElementById('profile-summary');
+    if (!box) return;
+    if (!p || Object.keys(p).length === 0) {
+      box.innerHTML = "<small>Aucun profil dans le navigateur.</small>";
+    } else {
+      // Affiche un résumé lisible (pour le diagnostic)
+      box.innerHTML = `
+        <div style="font-family:ui-monospace;white-space:pre-wrap;background:#1f1b2b;border:1px solid #3a2f55;border-radius:10px;padding:10px">
+          ${p.display_name ? "Nom/Pseudo: "+p.display_name+"\n" : ""}
+          ${p.my_gender ? "Genre: "+p.my_gender+"\n" : ""}
+          ${p.age ? "Âge: "+p.age+"\n" : ""}
+        </div>`;
+    }
+  }catch(e){}
+})();
+</script>
