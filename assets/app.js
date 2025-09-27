@@ -84,16 +84,66 @@ function beep(){
 }
 function maybeNotify(newCount){
   if (newCount > lastCount){
-    beep();
+    if(notifyAllowed()) beep();
     if (('Notification' in window)) {
       if (Notification.permission === 'granted'){
-        new Notification('Serendi', { body: 'Nouvelle personne à proximité' });
+        if(notifyAllowed()) new Notification('Serendi', { body: 'Nouvelle personne à proximité' });
       } else if (Notification.permission !== 'denied'){
         Notification.requestPermission(()=>{});
       }
     }
   }
   lastCount = newCount;
+}
+
+
+// --- Availability & Notifications ---
+const nowTs = () => Date.now();
+const readFlag = (k)=>{ try{return JSON.parse(localStorage.getItem(k)||'null')}catch(e){return null} };
+const writeFlag = (k,v)=>localStorage.setItem(k, JSON.stringify(v));
+
+function isMuted(){
+  const m = readFlag('mute_until');
+  return m && nowTs() < m;
+}
+function isQuietNow(){
+  const s = (readSettings().quiet||'').replace('–','-').trim();
+  if(!s.includes('-')) return false;
+  const [a,b] = s.split('-').map(t=>t.trim());
+  const toMin = (hhmm)=>{ const [h,m]=hhmm.split(':').map(n=>parseInt(n||'0')); return h*60+(m||0); };
+  const cur = new Date(); const mins = cur.getHours()*60+cur.getMinutes();
+  const A = toMin(a), B = toMin(b);
+  if (isNaN(A) || isNaN(B)) return false;
+  if (A <= B) return (mins>=A && mins<B);      // 08:00-22:00
+  return (mins>=A || mins<B);                  // 22:00-08:00 (nuit)
+}
+function notifyAllowed(){ return !(isMuted() || isQuietNow()); }
+
+function setAvailable(minutes=60){
+  const until = nowTs() + minutes*60*1000;
+  writeFlag('available_until', until);
+  pingPresence();
+  updateAvailabilityUI();
+}
+function clearAvailable(){
+  writeFlag('available_until', null);
+  updateAvailabilityUI();
+}
+function isAvailable(){ const u = readFlag('available_until'); return u && nowTs()<u; }
+function remainingMin(){ const u = readFlag('available_until'); if(!u) return 0; return Math.max(0, Math.ceil((u-nowTs())/60000)); }
+
+function updateAvailabilityUI(){
+  const b = document.getElementById('btn-available');
+  const t = document.getElementById('avail-text');
+  if(!b) return;
+  if(isAvailable()){
+    const r = remainingMin();
+    b.textContent = `Visible (${r} min)`;
+    if(t) t.textContent = `Vous êtes visible encore ${r} min`;
+  } else {
+    b.textContent = 'Disponible (60 min)';
+    if(t) t.textContent = 'Vous n’êtes pas visible. Vous recevez quand même les notifications.';
+  }
 }
 
 // Safety
@@ -147,17 +197,4 @@ function startRadarLoops(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((pos)=>{ me.lat=pos.coords.latitude; me.lon=pos.coords.longitude; }, ()=>{}, { enableHighAccuracy:true });
   }
-  setInterval(pingPresence, 120000);
-  setInterval(fetchNearby, 15000);
-}
-
-document.addEventListener('DOMContentLoaded', ()=>{
-  $('#btn-save-profile')?.addEventListener('click', (e)=>{ e.preventDefault(); saveProfile(); });
-  renderSummary();
-  const s = readSettings(); if($('#quiet') && s.quiet) $('#quiet').value = s.quiet; if($('#radius') && s.radius) $('#radius').value = String(s.radius);
-  $('#btn-save-settings')?.addEventListener('click', (e)=>{ e.preventDefault(); writeSettings({ quiet:($('#quiet')?.value||''), radius:Number($('#radius')?.value)||100 }); applyRadius(); initMap(); toast('Réglages enregistrés.'); });
-  applyRadius(); initMap();
-  $('#btn-panic')?.addEventListener('click', panic);
-  startRadarLoops();
-  document.getElementById('btn-available')?.addEventListener('click', async ()=>{ await pingPresence(); await fetchNearby(); toast('Tu es visible pendant ~60 min.'); });
-});
+  
