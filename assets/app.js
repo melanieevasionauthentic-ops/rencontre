@@ -15,7 +15,7 @@ function saveProfile(){
   const num = (sel)=>{ const v = Number(document.querySelector(sel)?.value); return isFinite(v) ? v : null; };
   const checked = (sel)=>document.querySelector(sel)?.checked || false;
   const multi = (sel)=>Array.from(document.querySelector(sel)?.selectedOptions || []).map(o=>o.value);
-  const data = { my_gender: val('#my_gender'), my_orientation: multi('#my_orientation'), 
+  const data = {
     age: num('#age'), height: num('#height'), hair: val('#hair'), body: val('#body'),
     religion: val('#religion'), diet: val('#diet'),
     bio: (val('#bio')||'').slice(0,2400),
@@ -33,8 +33,6 @@ function renderSummary(){
   if (p.hair) chips.push(`<chip>Cheveux ${p.hair}</chip>`);
   if (p.body) chips.push(`<chip>Corps ${p.body}</chip>`);
   if (p.religion) chips.push(`<chip>Religion ${p.religion}</chip>`);
-  if (p.my_gender) chips.push(`<chip>Genre ${p.my_gender}</chip>`);
-  if (p.my_orientation && p.my_orientation.length) chips.push(`<chip>Orientation ${p.my_orientation.join(', ')}</chip>`);
   if (p.diet) chips.push(`<chip>Régime ${p.diet}</chip>`);
   const lst=[]; const s=p.seek||{};
   if (s.women) lst.push('Femmes'); if (s.men) lst.push('Hommes'); if (s.nb) lst.push('Non binaires'); if (s.trans) lst.push('Trans');
@@ -43,12 +41,12 @@ function renderSummary(){
 }
 
 // Map
-let map, meMarker, meCircle;
+let map, meMarker, meCircle; let othersLayers = [];
 function initMap(){
   const box = document.getElementById('map');
   if(!box || typeof L==='undefined') return;
   if(map) map.remove();
-  map = L.map('map', { zoomControl: true });
+  map = L.map('map', { zoomControl: true }); window.map = map;
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'&copy; OpenStreetMap' }).addTo(map);
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((pos)=>{
@@ -60,6 +58,7 @@ function initMap(){
   } else { renderPosition(48.8566, 2.3522); }
 }
 function renderPosition(lat, lon){
+  const { data, error } = res; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
   const r = getRadius();
   if(!map) return;
   map.setView([lat, lon], 15);
@@ -68,6 +67,33 @@ function renderPosition(lat, lon){
   meMarker = L.marker([lat, lon]).addTo(map).bindPopup("Vous êtes ici");
   meCircle = L.circle([lat, lon], { radius: r, fillOpacity: .08, color: '#e879f9' }).addTo(map);
   me.lat = lat; me.lon = lon;
+}
+
+
+let lastCount = 0;
+function beep(){
+  try {
+    const ctx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'sine'; o.frequency.setValueAtTime(880, ctx.currentTime);
+    g.gain.setValueAtTime(0.001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.4);
+    o.connect(g); g.connect(ctx.destination); o.start(); o.stop(ctx.currentTime+0.45);
+  } catch(e) {}
+}
+function maybeNotify(newCount){
+  if (newCount > lastCount){
+    beep();
+    if (('Notification' in window)) {
+      if (Notification.permission === 'granted'){
+        new Notification('Serendi', { body: 'Nouvelle personne à proximité' });
+      } else if (Notification.permission !== 'denied'){
+        Notification.requestPermission(()=>{});
+      }
+    }
+  }
+  lastCount = newCount;
 }
 
 // Safety
@@ -94,19 +120,22 @@ async function pingPresence(){
   if(!sb || me.lat==null) return;
   const radius = getRadius();
   const bio = (readProfile().bio || '').slice(0, 1200);
-  const exp = new Date(Date.now() + 10*60*1000).toISOString();
-  await sb.from('presence').insert({ lat: me.lat, lon: me.lon, radius_m: radius, bio_short: bio, expires_at: exp });
+  const exp = new Date(Date.now() + 60*60*1000).toISOString();
+  const ins = await sb.from('presence').insert({ lat: me.lat, lon: me.lon, radius_m: radius, bio_short: bio, expires_at: exp });
+  if(ins.error){ console.error(ins.error); toast('Erreur envoi présence'); }
 }
 async function fetchNearby(){
   if(!sb || me.lat==null) return;
-  const { data } = await sb.from('presence')
+  const res = await sb.from('presence')
     .select('lat,lon,radius_m,bio_short,updated_at')
     .gt('expires_at', new Date().toISOString())
     .order('updated_at', { ascending:false })
     .limit(200);
+  const { data, error } = res; if(error){ console.error(error); toast('Erreur lecture présence'); return; }
   const r = getRadius();
   const inRange = (data||[]).filter(p => distM(me.lat, me.lon, p.lat, p.lon) <= Math.min(r, p.radius_m));
   const countEl = document.querySelector('.kpi .v'); if(countEl) countEl.textContent = String(inRange.length);
+  try{ maybeNotify(inRange.length); }catch(e){}
   const descEl = document.getElementById('nearby-desc');
   if(descEl) descEl.innerHTML = inRange[0]?.bio_short ? inRange[0].bio_short : "<i>En attente d’une proximité…</i>";
   if(typeof L!=='undefined' && map){
@@ -118,8 +147,8 @@ function startRadarLoops(){
   if (navigator.geolocation) {
     navigator.geolocation.watchPosition((pos)=>{ me.lat=pos.coords.latitude; me.lon=pos.coords.longitude; }, ()=>{}, { enableHighAccuracy:true });
   }
-  setInterval(pingPresence, 60000); // 60s pour tests
-  setInterval(fetchNearby, 8000); // 8s pour tests
+  setInterval(pingPresence, 120000);
+  setInterval(fetchNearby, 15000);
 }
 
 document.addEventListener('DOMContentLoaded', ()=>{
@@ -129,9 +158,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   $('#btn-save-settings')?.addEventListener('click', (e)=>{ e.preventDefault(); writeSettings({ quiet:($('#quiet')?.value||''), radius:Number($('#radius')?.value)||100 }); applyRadius(); initMap(); toast('Réglages enregistrés.'); });
   applyRadius(); initMap();
   $('#btn-panic')?.addEventListener('click', panic);
-  // Disponibilité: ping immédiat + rafraîchissement
-  $('#btn-available')?.addEventListener('click', async ()=>{ await pingPresence(); await fetchNearby(); toast('Tu es visible pendant ~10 min.'); });
-  $('#btn-stealth')?.addEventListener('click', ()=>{ toast('Pause notifications (démo).'); });
-
   startRadarLoops();
+  document.getElementById('btn-available')?.addEventListener('click', async ()=>{ await pingPresence(); await fetchNearby(); toast('Tu es visible pendant ~60 min.'); });
 });
