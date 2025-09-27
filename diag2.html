@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagnostic Supabase (brut)</title>
+  <style>
+    body{font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;background:#120818;color:#fff;margin:0;padding:24px}
+    .btn{appearance:none;border:none;padding:12px 16px;border-radius:10px;font-weight:700;cursor:pointer;background:linear-gradient(90deg,#e879f9,#a78bfa);color:#210a2a;margin-right:10px}
+    pre{background:#231033;padding:12px;border-radius:12px;max-height:55vh;overflow:auto}
+    code{background:#231033;padding:2px 6px;border-radius:6px}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <h1>Diagnostic Supabase (brut)</h1>
+  <p>URL: <code id="u"></code></p>
+  <p>Anon: <code id="k"></code></p>
+  <button class="btn" id="ins">Test insert</button>
+  <button class="btn" id="sel">Test select</button>
+  <pre id="out"></pre>
+  <script>
+    const SUPABASE_URL  = "https://ooimucjcismsaxujmiqe.supabase.co";
+    const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW11Y2pjaXNtc2F4dWptaXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4NTc4NjQsImV4cCI6MjA3NDQzMzg2NH0.P_rLb78p5f69_WLmELGWQ2UKde0nks6QjLk_4NLlOng";
+    const out = (m)=>{ document.getElementById('out').textContent += m + "\n"; };
+    document.getElementById('u').textContent = SUPABASE_URL;
+    document.getElementById('k').textContent = SUPABASE_ANON.slice(0,12)+'...';
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    document.getElementById('ins').onclick = async ()=>{
+      try{
+        const exp = new Date(Date.now() + 60*60*1000).toISOString();
+        const r = await sb.from('presence').insert({ lat:48.8566, lon:2.3522, radius_m:300, bio_short:'test-diag2', expires_at:exp });
+        out("insert: " + JSON.stringify(r, null, 2));
+      }catch(e){ out("insert exception: " + e.message); }
+    };
+    document.getElementById('sel').onclick = async ()=>{
+      try{
+        const r = await sb.from('presence').select('id,lat,lon,radius_m,bio_short,updated_at,expires_at').order('updated_at',{ascending:false}).limit(5);
+        out("select: " + JSON.stringify(r, null, 2));
+      }catch(e){ out("select exception: " + e.message); }
+    };
+  </script>
+</body>
+</html>

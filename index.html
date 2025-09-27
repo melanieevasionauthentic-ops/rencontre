@@ -1,0 +1,32 @@
+---
+layout: default
+title: Radar
+---
+<section class="card">
+  <h1>Rencontres comme avant</h1>
+  <p><b>Sans photo. Sans swipe. Sans jugement.</b> On se croise, on se parle, et si le feeling passe… une amitié ou une histoire peut commencer.</p>
+</section>
+
+<section class="card">
+  <h2>Radar de proximité</h2>
+  <div class="grid grid-2" style="align-items:start">
+    <div>
+      <div id="map" class="mapbox" aria-label="Carte"></div>
+      <div class="row" style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn" id="btn-available">Disponible (60 min)</button>
+        <button class="btn ghost" id="btn-stealth">Mettre en pause (3 h)</button>
+      </div>
+      <small id="avail-text">Vous n’êtes pas visible. Vous recevez quand même les notifications.</small>
+    </div>
+    <div class="card">
+      <h2>Mon résumé</h2>
+      <div id="profile-summary"><small>Crée ou complète ton profil.</small></div>
+      <hr/>
+      <h2>Proximités</h2>
+      <p class="kpi"><span class="v">0</span>&nbsp;<span class="mono">à ~<span id="radius-display">1000</span> m</span></p>
+      <div id="nearby-list" style="display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 6px"></div>
+      <hr/>
+      <p id="nearby-desc"><i>En attente d’une proximité…</i></p>
+    </div>
+  </div>
+</section>
