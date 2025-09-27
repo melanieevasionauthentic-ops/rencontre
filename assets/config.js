@@ -1,0 +1,4 @@
+window.SERENDI_CFG = {
+  SUPABASE_URL: "https://YOUR-PROJECT.supabase.co",
+  SUPABASE_ANON: "ey...your_anon_key...",
+};
