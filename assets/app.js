@@ -136,8 +136,19 @@ async function loadNearby(){
 
     if (sel){
       const o = document.createElement('option');
-      o.value = r.id; o.textContent = prof.display_name || ('#'+r.id.slice(0,6));
-      sel.appendChild(o);
+o.value = r.id;
+
+const name = prof.display_name || ('#' + r.id.slice(0,6));
+const gender = (prof.gender || '').toString().trim(); // ex. "Femme", "Homme"
+const age = (prof.age && Number(prof.age) > 0) ? `${prof.age} ans` : '';
+
+const bits = [name];
+if (gender) bits.push(gender);
+if (age) bits.push(age);
+
+o.textContent = bits.join(' · ');
+sel.appendChild(o);
+
     }
   }
 }
