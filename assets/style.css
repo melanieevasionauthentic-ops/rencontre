@@ -29,3 +29,6 @@ label{font-size:13px;opacity:.9}
 #toast.show{opacity:1}
 footer{padding:24px 16px;color:#cdb7e6;text-align:center}
 .small{font-size:12px;opacity:.8}
+.badge{display:inline-block;border:1px solid var(--line);padding:2px 8px;border-radius:999px;font-size:12px;margin-left:6px}
+.badge.ok{border-color:#47e082}
+.badge.no{border-color:#ff7b7b}
