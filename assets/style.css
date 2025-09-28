@@ -22,3 +22,4 @@ select[multiple]{min-height:140px}
 .toast.show{display:block}
 .check{display:flex;align-items:center;gap:10px}
 .check input{width:18px;height:18px}
+
