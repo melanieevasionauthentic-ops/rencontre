@@ -1,1 +1,4 @@
-window.SERENDI_CFG={SUPABASE_URL:"https://ooimucjcismsaxujmiqe.supabase.co",SUPABASE_ANON:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW11Y2pjaXNtc2F4dWptaXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4NTc4NjQsImV4cCI6MjA3NDQzMzg2NH0.P_rLb78p5f69_WLmELGWQ2UKde0nks6QjLk_4NLlOng"};
+window.SERENDI_CFG = {
+  SUPABASE_URL: "https://ooimucjcismsaxujmiqe.supabase.co",
+  SUPABASE_ANON: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vaW11Y2pjaXNtc2F4dWptaXFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg4NTc4NjQsImV4cCI6MjA3NDQzMzg2NH0.P_rLb78p5f69_WLmELGWQ2UKde0nks6QjLk_4NLlOng"
+};

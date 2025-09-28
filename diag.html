@@ -1,38 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 
-<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Diagnostic • Serendi</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Serendi — Rencontres à l’ancienne</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-</head><body>
-<header class="nav container">
-  <a href="index.html">Radar</a>
-  <a href="onboarding.html">Profil</a>
-  <a href="settings.html">Réglages</a>
-  <a aria-current="page" href="diag.html">Diagnostic</a>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script defer src="assets/app.js"></script>
+
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html"><img src="assets/logo.svg" alt="logo"><strong>Serendi</strong></a>
+  <nav>
+    <a href="index.html" class="active">Radar</a>
+    <a href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="privacy.html">Vie privée</a>
+    <a href="diag.html">Diag</a>
+  </nav>
 </header>
 
-<main class="container card">
-  <h1>Diagnostic</h1>
-  <p><b>Config Supabase</b> : <code id="cfg"></code></p>
-  <p><b>Leaflet</b> : <code id="leaf"></code></p>
-  <p><b>Géolocalisation</b> : <code id="geo"></code></p>
-  <div id="map" class="mapbox" style="margin-top:12px"></div>
+<main class="container">
+  <div class="card">
+    <h1>Diagnostic</h1>
+    <pre id="out" class="card" style="overflow:auto;white-space:pre-wrap"></pre>
+  </div>
 </main>
-
-<script src="assets/config.js?v=15"></script>
 <script>
-  const c = window.SERENDI_CFG||{};
-  document.getElementById('cfg').textContent = (c.SUPABASE_URL && c.SUPABASE_ANON) ? 'OK' : 'MANQUANTE';
+(async function(){
+  const lines=[];
+  lines.push('Config URL: ' + (window.SERENDI_CFG?.SUPABASE_URL||'⚠️ manquant'));
+  lines.push('Config ANON: ' + (window.SERENDI_CFG?.SUPABASE_ANON ? 'ok' : '⚠️ manquant'));
+  lines.push('Leaflet: ' + (window.L ? 'ok' : '⚠️ non chargé'));
+  lines.push('Géoloc: ' + (navigator.geolocation ? 'ok' : '⚠️ non dispo'));
   try{
-    const m=L.map('map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
-    m.setView([48.8566,2.3522], 12); document.getElementById('leaf').textContent='OK';
-  }catch(e){ document.getElementById('leaf').textContent='ERREUR'; }
-  if(navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      ()=>document.getElementById('geo').textContent='OK',
-      ()=>document.getElementById('geo').textContent='REFUSÉ (autorise la position)');
-  }else{ document.getElementById('geo').textContent='INDISPONIBLE'; }
+    const supa = window.supabase.createClient(window.SERENDI_CFG.SUPABASE_URL, window.SERENDI_CFG.SUPABASE_ANON);
+    const { data, error } = await supa.from('presence').select('id').limit(1);
+    lines.push('Presence SELECT: ' + (error ? ('⚠️ ' + error.message) : 'ok'));
+  }catch(e){ lines.push('Supabase init: ⚠️ '+ e.message); }
+  document.querySelector('#out').textContent = lines.join('\n');
+})();
 </script>
-</body></html>
+</body>
+</html>

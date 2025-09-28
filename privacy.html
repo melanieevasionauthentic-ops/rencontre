@@ -1,23 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 
-<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Vie privée • Serendi</title>
-<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/style.css">
-</head><body>
-<header class="nav container">
-  <a href="index.html">Radar</a>
-  <a href="onboarding.html">Profil</a>
-  <a href="settings.html">Réglages</a>
-  <a aria-current="page" href="privacy.html">Vie privée</a>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Serendi — Rencontres à l’ancienne</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script defer src="assets/app.js"></script>
+
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html"><img src="assets/logo.svg" alt="logo"><strong>Serendi</strong></a>
+  <nav>
+    <a href="index.html" class="active">Radar</a>
+    <a href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="privacy.html">Vie privée</a>
+    <a href="diag.html">Diag</a>
+  </nav>
 </header>
 
-<main class="container card">
-  <h1>Vie privée</h1>
-  <p>Localisation éphémère (60 min), pas de photos, données minimales.</p>
-  <p>Vous contrôlez à tout moment la visibilité (bouton “Disponible” / “Pause”).</p>
+<main class="container">
+  <div class="card">
+    <h1>Vie privée</h1>
+    <p>Serendi évite les messages privés et la collecte d’images. Tu apparais sur le radar quand tu cliques “Disponible (60 min)”.</p>
+    <ul>
+      <li>Position stockée 60 min max, puis supprimée.</li>
+      <li>Profil minimal : pseudo, âge, genre, repère visuel.</li>
+      <li>Pas de chat : la rencontre se fait en vrai.</li>
+    </ul>
+  </div>
 </main>
-
-<script src="assets/config.js?v=15"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=15"></script>
-</body></html>
+</body>
+</html>

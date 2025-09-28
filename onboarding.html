@@ -1,42 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
 
-<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Profil • Serendi</title>
-<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/style.css">
-</head><body>
-<header class="nav container">
-  <a href="index.html">Radar</a>
-  <a aria-current="page" href="onboarding.html">Profil</a>
-  <a href="settings.html">Réglages</a>
-  <a href="privacy.html">Vie privée</a>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Serendi — Rencontres à l’ancienne</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
+<script src="assets/config.js"></script>
+<script defer src="assets/app.js"></script>
+
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html"><img src="assets/logo.svg" alt="logo"><strong>Serendi</strong></a>
+  <nav>
+    <a href="index.html" class="active">Radar</a>
+    <a href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="privacy.html">Vie privée</a>
+    <a href="diag.html">Diag</a>
+  </nav>
 </header>
 
-<main class="container card">
-  <h1>Créer mon profil</h1>
-  <label>Nom / Pseudo</label><input id="display_name" placeholder="Ex. Léa, Sam, Alex…">
-  <label>Qui je suis — Genre</label>
-  <select id="my_gender">
-    <option></option><option>Femme</option><option>Homme</option><option>Non binaire</option><option>Trans</option>
-  </select>
-  <label>Qui je suis — Orientation (optionnel)</label>
-  <select id="my_orientation" multiple>
-    <option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option><option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option><option>Hétéro</option>
-  </select>
-  <label>Âge</label><input id="age" type="number" placeholder="Ex. 29">
-  <label>Taille (cm)</label><input id="height" type="number" placeholder="Ex. 173">
-  <label>Cheveux</label><input id="hair" placeholder="Ex. blonds">
-  <label>Type de corps</label><input id="body" placeholder="Ex. avec formes">
-  <label>Type de relation recherchée</label>
-  <select id="relation_type"><option>Amitié</option><option>Amour</option><option>Peu importe</option></select>
-  <label>Description (300 mots max)</label><textarea id="bio" maxlength="2400" placeholder="Quelques lignes…"></textarea>
-  <label>Comment me reconnaître (conseil)</label><input id="recognize" placeholder="Ex. pull vert">
-
-  <div class="row" style="margin-top:12px"><button class="btn" id="btn-save-profile">Enregistrer</button></div>
-  <small class="mono">Après “Enregistrer”, tu es renvoyée au Radar.</small>
+<main class="container">
+  <div class="card">
+    <h1>Mon profil</h1>
+    <div class="grid">
+      <label>Nom / Pseudo
+        <input id="display_name" placeholder="ex: Eva">
+      </label>
+      <label>Genre
+        <select id="my_gender">
+          <option value="">—</option>
+          <option>Femme</option><option>Homme</option><option>Non-binaire</option><option>Autre</option>
+        </select>
+      </label>
+      <label>Orientation (Ctrl/Cmd pour multi)
+        <select id="my_orientation" multiple>
+          <option>Hétéro</option><option>Gay</option><option>Lesbienne</option><option>Bi</option><option>Pan</option><option>Asexuel·le</option>
+        </select>
+      </label>
+      <label>Âge
+        <input id="age" type="number" min="18" max="99">
+      </label>
+      <label>Taille (cm)
+        <input id="height" type="number" min="120" max="230">
+      </label>
+      <label>Cheveux
+        <input id="hair" placeholder="bruns, blonds…">
+      </label>
+      <label>Type de corps
+        <input id="body" placeholder="athlétique, normal…">
+      </label>
+      <label>Type de relation
+        <input id="relation_type" placeholder="amitié, amour…">
+      </label>
+      <label>Comment me reconnaître
+        <input id="recognize" placeholder="manteau rouge, robe noire…">
+      </label>
+      <label style="grid-column:1/-1">Bio (300 max utile sur radar)
+        <textarea id="bio" rows="4" placeholder="Quelques mots sur toi…"></textarea>
+      </label>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btn-save-profile">Enregistrer</button>
+    </div>
+  </div>
 </main>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-<script src="assets/config.js?v=15"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=15"></script>
-</body></html>
+<div id="toast"></div>
+</body>
+</html>
