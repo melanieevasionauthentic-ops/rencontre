@@ -13,6 +13,42 @@ let supa = null;
 try { if (SUPA_URL && SUPA_ANON && window.supabase) supa = window.supabase.createClient(SUPA_URL, SUPA_ANON); }
 catch(e){ console.warn('Init Supabase échoué', e); }
 
+// ---- Réception des demandes (Realtime) ----
+let subIntents = null;
+let lastBeepAt = 0;
+function playBeep(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.value=0.001; g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.18);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.2);
+  }catch(e){}
+}
+
+function listenIntents(){
+  if (!supa) return;
+  const uid = localStorage.getItem('uid');
+  if (!uid) return; // l’UID est créé au premier “Disponible”
+
+  // (Re)abonnement propre
+  if (subIntents){ try{ supa.removeChannel(subIntents); }catch(e){} subIntents = null; }
+
+  subIntents = supa.channel('intents-to-me')
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'intents',
+      filter: `to_id=eq.${uid}`
+    }, (payload) => {
+      // Bip unique (anti-spam ~8s)
+      if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
+      const from = payload?.new?.from_id?.slice(0,6) || 'Inconnu';
+      toast(`Nouvelle demande (#${from})`);
+    })
+    .subscribe();
+}
+
 /* Stockage */
 const readSettings=()=>{ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch(e){ return {}; } };
 const writeSettings=(o)=>localStorage.setItem('settings', JSON.stringify(o));
