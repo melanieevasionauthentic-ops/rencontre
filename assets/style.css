@@ -1,5 +1,7 @@
 :root{--bg:#13091a;--card:#1a0f24;--edge:rgba(255,255,255,.12);--text:#fff;--muted:#e9d7ff;--accent:#e879f9;}
-*{box-sizing:border-box}html,body{height:100%}body{margin:0;font:14px ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;background:radial-gradient(1000px 600px at 80% 10%,#3b0a49 0,transparent 60%),radial-gradient(900px 600px at 10% 120%,#2d0f6a 0,transparent 60%),var(--bg);color:var(--text)}
+*{box-sizing:border-box}html,body{height:100%}body{margin:0;font:14px ui-sans-serif,system-ui,Segoe UI,Roboto,Arial;background:
+radial-gradient(1000px 600px at 80% 10%,#3b0a49 0,transparent 60%),
+radial-gradient(900px 600px at 10% 120%,#2d0f6a 0,transparent 60%),var(--bg);color:var(--text)}
 .container{max-width:1100px;margin:0 auto;padding:24px}.nav{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .nav a{display:inline-block;padding:10px 16px;border:1px solid var(--edge);border-radius:999px;background:rgba(255,255,255,.06);color:#fff;text-decoration:none}
 .nav a[aria-current="page"]{background:linear-gradient(90deg,var(--accent),#a78bfa)}

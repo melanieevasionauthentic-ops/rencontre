@@ -1,49 +1,92 @@
-<!doctype html><html lang="fr"><head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Profil • Serendi</title>
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=8"/></head><body>
-<header class="nav container"><div class="brand"><strong>Serendi</strong></div><nav class="row">
-<a href="index.html">Radar</a><a aria-current="page" href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="privacy.html">Vie privée</a>
-</nav></header>
-<main class="container grid"><section class="card"><h1>Créer mon profil</h1>
-<div class="grid grid-2">
-<div>
-<label>Nom / Pseudo</label><input id="display_name" placeholder="Ex. Léa, Sam, Alex…"/>
-<label>Qui je suis — Genre</label><select id="my_gender"><option></option><option>Femme</option><option>Homme</option><option>Non binaire</option><option>Trans</option><option>Autre / Préfère ne pas dire</option></select>
-<label>Qui je suis — Orientation (optionnel)</label><select id="my_orientation" multiple>
-<option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option><option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option><option>Hétéro</option><option>Autre / Préfère ne pas dire</option>
-</select>
-<label>Âge</label><input id="age" type="number" min="18" max="120" placeholder="Ex. 29"/>
-<label>Taille (cm)</label><input id="height" type="number" min="120" max="250" placeholder="Ex. 173"/>
-<label>Cheveux</label><select id="hair"><option></option><option>Châtains</option><option>Bruns</option><option>Blonds</option><option>Roux</option><option>Noirs</option><option>Autre</option></select>
-<label>Type de corps</label><select id="body"><option></option><option>Sportif(ve)</option><option>Mince</option><option>Normal</option><option>Avec formes</option><option>Grand(e)</option><option>Autre</option></select>
-<label>Religion (optionnel)</label><select id="religion"><option value="">—</option><option>Chrétien(ne)</option><option>Musulman(e)</option><option>Juif(ve)</option><option>Hindou(e)</option><option>Bouddhiste</option><option>Agnostique</option><option>Athée</option><option>Autre / Préfère ne pas dire</option></select>
-<label>Régime alimentaire (optionnel)</label><select id="diet"><option value="">—</option><option>Végétarien</option><option>Vegan</option><option>Halal</option><option>Casher</option><option>Sans porc</option><option>Sans gluten</option><option>Omnivore</option><option>Autre</option></select>
-<label>Description</label><textarea id="bio" maxlength="2400" placeholder="Quelques lignes…"></textarea>
-<label>Comment me reconnaître</label><input id="recognize" placeholder="Ex. manteau rouge, robe noire"/>
-</div>
-<div>
-<h2>Ce que je recherche</h2>
-<label>Type de relation recherchée</label><select id="relation_type"><option></option><option>Amitié</option><option>Amour</option><option>Rencontre légère</option><option>Sorties</option><option>Autre</option></select>
-<div class="grid grid-2">
-  <label class="check"><input type="checkbox" id="seek_women"><span>Femmes</span></label>
-  <label class="check"><input type="checkbox" id="seek_men"><span>Hommes</span></label>
-  <label class="check"><input type="checkbox" id="seek_nb"><span>Personnes non binaires</span></label>
-  <label class="check"><input type="checkbox" id="seek_trans"><span>Personnes trans</span></label>
-</div>
-<label>Orientation(s) (optionnel)</label><select id="orientation" multiple>
-<option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option><option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option><option>Hétéro</option><option>Autre / Préfère ne pas dire</option>
-</select>
-<div class="grid grid-2"><div><label>Âge min.</label><input id="want_age_min" type="number" min="18" max="120"/></div>
-<div><label>Âge max.</label><input id="want_age_max" type="number" min="18" max="120"/></div></div>
-<div class="grid grid-2"><div><label>Taille min.</label><input id="want_h_min" type="number" min="120" max="250"/></div>
-<div><label>Taille max.</label><input id="want_h_max" type="number" min="120" max="250"/></div></div>
-<div class="row" style="margin-top:12px"><<button class="btn" id="btn-save-profile">Enregistrer</button>><a class="btn ghost" href="index.html">Aller au Radar</a></div>
-</div></div></section></main>
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Profil • Serendi</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css?v=11"/>
+</head>
+<body>
+<header class="nav container">
+  <div class="brand"><strong>Serendi</strong></div>
+  <nav class="row" aria-label="Navigation principale">
+    <a href="index.html">Radar</a>
+    <a aria-current="page" href="onboarding.html">Profil</a>
+    <a href="settings.html">Réglages</a>
+    <a href="privacy.html">Vie privée</a>
+  </nav>
+</header>
+
+<main class="container grid">
+  <section class="card">
+    <h1>Créer mon profil</h1>
+    <div class="grid grid-2">
+      <div>
+        <label>Nom / Pseudo</label><input id="display_name" placeholder="Ex. Léa, Sam, Alex…"/>
+        <label>Qui je suis — Genre</label>
+        <select id="my_gender"><option></option><option>Femme</option><option>Homme</option><option>Non binaire</option><option>Trans</option><option>Autre / Préfère ne pas dire</option></select>
+        <label>Qui je suis — Orientation (optionnel)</label>
+        <select id="my_orientation" multiple>
+          <option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option>
+          <option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option>
+          <option>Hétéro</option><option>Autre / Préfère ne pas dire</option>
+        </select>
+        <label>Âge</label><input id="age" type="number" min="18" max="120" placeholder="Ex. 29"/>
+        <label>Taille (cm)</label><input id="height" type="number" min="120" max="250" placeholder="Ex. 173"/>
+        <label>Cheveux</label>
+        <select id="hair"><option></option><option>Châtains</option><option>Bruns</option><option>Blonds</option><option>Roux</option><option>Noirs</option><option>Autre</option></select>
+        <label>Type de corps</label>
+        <select id="body"><option></option><option>Sportif(ve)</option><option>Mince</option><option>Normal</option><option>Avec formes</option><option>Grand(e)</option><option>Autre</option></select>
+        <label>Religion (optionnel)</label>
+        <select id="religion"><option value="">—</option><option>Chrétien(ne)</option><option>Musulman(e)</option><option>Juif(ve)</option><option>Hindou(e)</option><option>Bouddhiste</option><option>Agnostique</option><option>Athée</option><option>Autre / Préfère ne pas dire</option></select>
+        <label>Régime alimentaire (optionnel)</label>
+        <select id="diet"><option value="">—</option><option>Végétarien</option><option>Vegan</option><option>Halal</option><option>Casher</option><option>Sans porc</option><option>Sans gluten</option><option>Omnivore</option><option>Autre</option></select>
+        <label>Description (300 mots max)</label><textarea id="bio" maxlength="2400" placeholder="Quelques lignes…"></textarea>
+        <label>Comment me reconnaître (optionnel)</label><input id="recognize" placeholder="Ex. manteau rouge, robe noire"/>
+      </div>
+      <div>
+        <h2>Ce que je recherche</h2>
+        <label>Type de relation recherchée</label>
+        <select id="relation_type"><option></option><option>Amitié</option><option>Amour</option><option>Rencontre légère</option><option>Sorties</option><option>Autre</option></select>
+        <div class="grid grid-2">
+          <label class="check"><input type="checkbox" id="seek_women"><span>Femmes</span></label>
+          <label class="check"><input type="checkbox" id="seek_men"><span>Hommes</span></label>
+          <label class="check"><input type="checkbox" id="seek_nb"><span>Personnes non binaires</span></label>
+          <label class="check"><input type="checkbox" id="seek_trans"><span>Personnes trans</span></label>
+        </div>
+        <label>Orientation(s) (optionnel)</label>
+        <select id="orientation" multiple>
+          <option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option>
+          <option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option>
+          <option>Hétéro</option><option>Autre / Préfère ne pas dire</option>
+        </select>
+        <div class="grid grid-2">
+          <div><label>Âge min.</label><input id="want_age_min" type="number" min="18" max="120"/></div>
+          <div><label>Âge max.</label><input id="want_age_max" type="number" min="18" max="120"/></div>
+        </div>
+        <div class="grid grid-2">
+          <div><label>Taille min. (cm)</label><input id="want_h_min" type="number" min="120" max="250"/></div>
+          <div><label>Taille max. (cm)</label><input id="want_h_max" type="number" min="120" max="250"/></div>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="btn-save-profile">Enregistrer</button>
+          <a class="btn ghost" href="index.html">Aller au Radar</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
 <footer class="container"><div>© 2025 Serendi.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!-- Auto-test -->
 <div style="position:fixed;top:8px;left:8px;font:12px ui-monospace;color:#fff;background:#0008;border:1px solid #fff3;padding:6px;border-radius:10px" id="selftest">init…</div>
 <script>(function(){const ok=(i,b)=>document.getElementById('selftest').textContent+=` ${i}:${b?'OK':'KO'}`;ok('css',!!document.styleSheets.length);ok('appjs',true);})();</script>
-<script src="assets/config.js?v=8"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/app.js?v=8"></script>
-</body></html>
+
+<script src="assets/config.js?v=11"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js?v=11"></script>
+</body>
+</html>
