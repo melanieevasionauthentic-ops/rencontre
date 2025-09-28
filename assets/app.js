@@ -191,7 +191,81 @@ async function sendIntent(to_id){
   if (error){ toast('Intent: ' + (error.code?error.code+' ':'') + (error.message||'échec')); return; }
   toast('Demande envoyée');
 }
+// Afficher la liste des demandes reçues
+function renderIntentsPanel(items){
+  const box = document.querySelector('#intents-panel');
+  if (!box) return;
+  if (!items || !items.length){
+    box.innerHTML = '<i>Aucune demande pour l’instant.</i>';
+    return;
+  }
+  box.innerHTML = '';
+  items.forEach(it => {
+    const fromShort = (it.from_id||'????').slice(0,6);
+    const msg = (it.message||`Nouvelle demande (#${fromShort})`).toString();
+    const row = document.createElement('div');
+    row.className = 'card';
+    row.style.margin = '8px 0';
+    row.innerHTML = `
+      <div style="margin-bottom:8px">${msg}</div>
+      <input id="place-${it.id}" placeholder="Proposer un lieu (optionnel)">
+      <div class="row" style="margin-top:8px">
+        <button class="btn" data-accept="${it.id}">Je suis OK</button>
+        <button class="btn ghost" data-decline="${it.id}">Pas dispo</button>
+      </div>
+    `;
+    box.appendChild(row);
+  });
 
+  // Boutons Oui / Non
+  box.querySelectorAll('[data-accept]').forEach(b=>{
+    b.addEventListener('click', async (ev)=>{
+      const id = ev.currentTarget.getAttribute('data-accept');
+      const place = (document.querySelector('#place-'+id)?.value||'').toString().trim();
+      await respondIntent(id, true, place);
+    });
+  });
+  box.querySelectorAll('[data-decline]').forEach(b=>{
+    b.addEventListener('click', async (ev)=>{
+      const id = ev.currentTarget.getAttribute('data-decline');
+      await respondIntent(id, false, '');
+    });
+  });
+}
+
+// Envoyer la réponse dans Supabase
+async function respondIntent(id, accepted, place){
+  if (!supa) { toast('Supabase non configuré'); return; }
+  const payload = {
+    status: accepted ? 'accepted' : 'declined',
+    responded_at: new Date().toISOString(),
+    response_loc: place ? {
+      text: place,
+      lat: window._lastGeo?.lat || null,
+      lon: window._lastGeo?.lon || null
+    } : null
+  };
+  const { error } = await supa.from('intents').update(payload).eq('id', id);
+  if (error){ toast('Réponse: ' + (error.message||'échec')); return; }
+  toast(accepted ? 'Tu as accepté' : 'Tu as décliné');
+  // Option: remettre à jour la liste
+  await fetchMyIntents(); 
+}
+
+// Charger mes demandes reçues (si tu n’utilises pas Realtime sur intents)
+async function fetchMyIntents(){
+  if (!supa) return;
+  const uid = localStorage.getItem('uid'); if(!uid) return;
+  const { data, error } = await supa
+    .from('intents')
+    .select('id, from_id, message, created_at, status')
+    .eq('to_id', uid)
+    .eq('status', 'pending')
+    .order('created_at', { ascending:false })
+    .limit(20);
+  if (error) return;
+  renderIntentsPanel(data||[]);
+}
 /* Réception intents (Realtime) */
 let subIntents = null;
 function listenIntents(){
