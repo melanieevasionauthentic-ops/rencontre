@@ -145,10 +145,31 @@ function updateAvailabilityUI(){
 }
 
 async function upsertPresence(lat, lon){
+async function upsertPresence(lat, lon){
   const sb = sbClient(); if(!sb) return;
   const now = Date.now();
   const expires = new Date(now + 60*60*1000).toISOString();
-  const { error } = await sb.from('presence').upsert({ id: CID, lat, lon, radius_m:getRadius(), updated_at:new Date(now).toISOString(), expires_at:expires });
+  const p = readProfile();
+  // petit résumé qu’on stocke en JSON
+  const profile = {
+    name: p.display_name || null,
+    gender: p.my_gender || null,
+    age: p.age || null,
+    height: p.height || null,
+    hair: p.hair || null,
+    body: p.body || null,
+    relation: p.relation_type || null,
+    recognize: p.recognize || null,
+    orientation: (p.my_orientation||[]).slice(0,3) // court
+  };
+  const { error } = await sb.from('presence').upsert({
+    id: CID,
+    lat, lon,
+    radius_m: getRadius(),
+    updated_at: new Date(now).toISOString(),
+    expires_at: expires,
+    profile
+  });
   if(error) t('Erreur présence: '+error.message);
 }
 
