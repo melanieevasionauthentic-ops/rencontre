@@ -378,17 +378,40 @@ function hookSettings(){
 
 /* Démarrage */
 document.addEventListener('DOMContentLoaded', ()=>{
-  const isRadar = !!$('#map');
-  const isOnb   = !!$('#display_name');
-  const isSet   = !!$('#radius');
+  const isRadar = !!document.querySelector('#map');
+  const isOnb   = !!document.querySelector('#display_name');
+  const isSet   = !!document.querySelector('#radius');
 
   if (isRadar){
-    initMap(); wireUI(); locateMe();
-    setInterval(loadNearby, 12000); loadNearby();
-    if (!localStorage.getItem('uid')){ localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now()))); }
-    listenIntents();
-    const rd = $('#radius-display'); if (rd) rd.textContent = String(getRadius());
+    initMap();
+    wireUI();
+    locateMe();
+
+    // rafraîchit la carte / la liste régulièrement
+    setInterval(loadNearby, 12000);
+    loadNearby();
+
+    // garantit un UID local
+    if (!localStorage.getItem('uid')){
+      localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now())));
+    }
+
+    // 👉 branche les écoutes en temps réel + remplit le panneau
+    listenIntents();         // nouvelles demandes adressées à moi
+    listenIntentUpdates();   // réponses à MES demandes envoyées
+    fetchMyIntents();        // affiche les demandes reçues déjà en attente
+
+    // affiche le rayon courant
+    const rd = document.querySelector('#radius-display');
+    if (rd) rd.textContent = String(getRadius());
   }
-  if (isOnb) hookOnboarding();
-  if (isSet) hookSettings();
+
+  if (isOnb){
+    hookOnboarding();
+  }
+
+  if (isSet){
+    hookSettings();
+  }
 });
+
