@@ -2,7 +2,7 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Radar • Serendi</title>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css?v=12"/>
+<link rel="stylesheet" href="assets/style.css?v=13"/>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 </head><body>
@@ -30,5 +30,7 @@
 </section></main>
 <footer class="container"><div>© 2025 Serendi.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-<script src="assets/config.js?v=12"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/app.js?v=12"></script>
+<div id="selftest" style="position:fixed;top:8px;left:8px;font:12px ui-monospace;color:#fff;background:#0008;border:1px solid #fff3;padding:6px;border-radius:10px">init…</div>
+<script>document.getElementById('selftest').textContent+=' css:'+(!!document.styleSheets.length?'OK':'KO');</script>
+<script src="assets/config.js?v=13"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/app.js?v=13"></script>
 </body></html>
