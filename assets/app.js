@@ -145,7 +145,6 @@ function updateAvailabilityUI(){
 }
 
 async function upsertPresence(lat, lon){
-async function upsertPresence(lat, lon){
   const sb = sbClient(); if(!sb) return;
   const now = Date.now();
   const expires = new Date(now + 60*60*1000).toISOString();
@@ -172,7 +171,6 @@ async function upsertPresence(lat, lon){
   });
   if(error) t('Erreur présence: '+error.message);
 }
-
 function distMeters(a,b){
   const [lat1,lon1]=a,[lat2,lon2]=b, R=6371000, toRad=x=>x*Math.PI/180;
   const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
