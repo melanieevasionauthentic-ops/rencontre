@@ -206,3 +206,50 @@ function startRadarLoops(){ if(_radarTimer) clearInterval(_radarTimer); _radarTi
   };
   if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', run); } else { run(); }
 })();
+// --- PATCH ENREGISTREMENT PROFIL ---
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-save-profile');
+  if (!btn) return;
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    const val = sel => (document.querySelector(sel)?.value || '').trim();
+    const multi = sel => Array.from(document.querySelector(sel)?.selectedOptions || []).map(o=>o.value);
+
+    const p = {
+      display_name: val('#display_name'),
+      my_gender: val('#my_gender'),
+      my_orientation: multi('#my_orientation'),
+      age: Number(val('#age')) || null,
+      height: Number(val('#height')) || null,
+      hair: val('#hair'),
+      body: val('#body'),
+      religion: val('#religion'),
+      diet: val('#diet'),
+      bio: (val('#bio') || '').slice(0, 2400),
+      recognize: val('#recognize'),
+      seek: {
+        women: !!document.querySelector('#seek_women')?.checked,
+        men: !!document.querySelector('#seek_men')?.checked,
+        nb: !!document.querySelector('#seek_nb')?.checked,
+        trans: !!document.querySelector('#seek_trans')?.checked,
+      },
+      orientation: multi('#orientation'),
+      relation_type: val('#relation_type'),
+      want: {
+        age: [Number(val('#want_age_min')) || null, Number(val('#want_age_max')) || null],
+        height: [Number(val('#want_h_min')) || null, Number(val('#want_h_max')) || null],
+      },
+    };
+
+    try {
+      localStorage.setItem('profile', JSON.stringify(p));
+      // petit feedback
+      const t = document.getElementById('toast'); 
+      if (t) { t.textContent = 'Profil enregistré.'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1500); }
+    } catch(e) {}
+
+    // on revient au radar
+    setTimeout(()=>{ window.location.href = 'index.html'; }, 200);
+  });
+});
+// --- FIN PATCH ENREGISTREMENT PROFIL ---
