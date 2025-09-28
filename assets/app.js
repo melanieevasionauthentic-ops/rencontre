@@ -193,15 +193,61 @@ async function fetchNearby(){
 }
 
 function renderNearby(list){
+  // 1) dédoublonnage par id (on garde la plus proche)
+  const uniq = {};
+  for (const p of list) {
+    if (!uniq[p.id] || p.d < uniq[p.id].d) uniq[p.id] = p;
+  }
+  const arr = Object.values(uniq).sort((a,b)=>a.d-b.d);
+
+  // 2) UI compteur + select
   const sel = $('#nearby-select');
-  if(sel) sel.innerHTML = '<option value="">— choisir —</option>' + list.map(p=>`<option value="${p.id}">#${p.id.slice(0,4)} — ${(p.d|0)} m</option>`).join('');
-  const kpi = document.querySelector('.kpi .v'); if (kpi) kpi.textContent = String(list.length);
+  if(sel) sel.innerHTML = '<option value="">— choisir —</option>' +
+    arr.map(p=>`<option value="${p.id}">${(p.profile?.name||('#'+p.id.slice(0,4)))} — ${(p.d|0)} m</option>`).join('');
+
+  const kpi = document.querySelector('.kpi .v'); 
+  if (kpi) kpi.textContent = String(arr.length);
+
+  // 3) Carte : on efface puis on remet
   const map = window.__SERENDI_MAP;
   if (map){
     if (window.__NEARBY__) { window.__NEARBY__.forEach(m=>map.removeLayer(m)); }
     window.__NEARBY__ = [];
-    list.forEach(p=>{ window.__NEARBY__.push(L.circleMarker([p.lat,p.lon],{radius:6,color:'#a78bfa'}).addTo(map)); });
+    arr.forEach(p=>{
+      const m = L.circleMarker([p.lat,p.lon], {radius:6,color:'#a78bfa'}).addTo(map);
+      const prof = p.profile||{};
+      const title = prof.name || ('#'+p.id.slice(0,8));
+      const desc = [
+        prof.gender ? `Genre: ${prof.gender}` : null,
+        prof.age ? `Âge: ${prof.age}` : null,
+        prof.height ? `Taille: ${prof.height} cm` : null,
+        prof.hair ? `Cheveux: ${prof.hair}` : null,
+        prof.body ? `Corps: ${prof.body}` : null,
+        prof.relation ? `Recherche: ${prof.relation}` : null,
+        prof.recognize ? `Reconnaître: ${prof.recognize}` : null
+      ].filter(Boolean).join('<br>');
+      m.bindPopup(`<b>${title}</b><br>${desc || '—'}`);
+      window.__NEARBY__.push(m);
+    });
   }
+
+  // 4) Description sous la liste
+  const box = $('#nearby-desc');
+  if(sel && box){
+    sel.onchange = ()=>{
+      const c = arr.find(x=>x.id===sel.value);
+      if (!c) { box.innerHTML = '<i>En attente d’une proximité…</i>'; return; }
+      const prof = c.profile||{};
+      box.innerHTML = `<b>${prof.name||('#'+c.id.slice(0,8))}</b><br>
+        ${prof.gender||'—'}${prof.age?`, ${prof.age} ans`:''}${prof.height?`, ${prof.height} cm`:''}<br>
+        ${prof.hair||'—'} · ${prof.body||'—'}<br>
+        Recherche: ${prof.relation||'—'}<br>
+        Orientation: ${(prof.orientation||[]).join(', ')||'—'}<br>
+        Reconnaître: ${prof.recognize||'—'}<br>
+        Distance ~${c.d|0} m`;
+    };
+  }
+}
   const box = $('#nearby-desc');
   if(sel && box){ sel.onchange = ()=>{ const c = list.find(x=>x.id===sel.value); box.textContent = c ? `ID ${c.id.slice(0,8)} — ~${c.d|0} m` : 'En attente d’une proximité…'; }; }
 }
