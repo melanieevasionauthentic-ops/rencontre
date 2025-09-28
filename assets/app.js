@@ -280,3 +280,8 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if (isOnb) hookOnboarding();
   if (isSet) hookSettings();
 });
+    // Garantir un uid local puis écouter les intents entrants
+    if (!localStorage.getItem('uid')){
+      localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now())));
+    }
+    listenIntents();
