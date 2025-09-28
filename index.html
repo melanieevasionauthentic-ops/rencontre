@@ -1,1 +1,38 @@
-<!doctype html><meta charset='utf-8'><link rel='icon' href='assets/favicon.svg'><link rel='stylesheet' href='assets/style.css'><h1 style='color:#fff'>Paquet v14 prêt</h1>
+
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Radar • Serendi</title>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head><body>
+<header class="nav container">
+  <a aria-current="page" href="index.html">Radar</a>
+  <a href="onboarding.html">Profil</a>
+  <a href="settings.html">Réglages</a>
+  <a href="privacy.html">Vie privée</a>
+</header>
+
+<main class="container card">
+  <h1>Radar</h1>
+  <div id="map" class="mapbox"></div>
+  <div class="row" style="margin-top:10px">
+    <button class="btn" id="btn-available">Disponible (60 min)</button>
+    <button class="btn ghost" id="btn-stealth">Mettre en pause (3 h)</button>
+  </div>
+
+  <p class="kpi" style="margin-top:10px"><span class="v">0</span> à ~<span id="radius-display">1000</span> m</p>
+
+  <label style="margin-top:14px">Personnes proches</label>
+  <select id="nearby-select"></select>
+  <div style="height:10px"></div>
+  <button class="btn" id="btn-request">Je veux rencontrer cette personne</button>
+  <hr/>
+  <div id="nearby-desc"><i>En attente d’une proximité…</i></div>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/config.js?v=15"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js?v=15"></script>
+</body></html>

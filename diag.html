@@ -1,1 +1,38 @@
-<!doctype html><meta charset='utf-8'>
+
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnostic • Serendi</title>
+<link rel="stylesheet" href="assets/style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head><body>
+<header class="nav container">
+  <a href="index.html">Radar</a>
+  <a href="onboarding.html">Profil</a>
+  <a href="settings.html">Réglages</a>
+  <a aria-current="page" href="diag.html">Diagnostic</a>
+</header>
+
+<main class="container card">
+  <h1>Diagnostic</h1>
+  <p><b>Config Supabase</b> : <code id="cfg"></code></p>
+  <p><b>Leaflet</b> : <code id="leaf"></code></p>
+  <p><b>Géolocalisation</b> : <code id="geo"></code></p>
+  <div id="map" class="mapbox" style="margin-top:12px"></div>
+</main>
+
+<script src="assets/config.js?v=15"></script>
+<script>
+  const c = window.SERENDI_CFG||{};
+  document.getElementById('cfg').textContent = (c.SUPABASE_URL && c.SUPABASE_ANON) ? 'OK' : 'MANQUANTE';
+  try{
+    const m=L.map('map'); L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+    m.setView([48.8566,2.3522], 12); document.getElementById('leaf').textContent='OK';
+  }catch(e){ document.getElementById('leaf').textContent='ERREUR'; }
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      ()=>document.getElementById('geo').textContent='OK',
+      ()=>document.getElementById('geo').textContent='REFUSÉ (autorise la position)');
+  }else{ document.getElementById('geo').textContent='INDISPONIBLE'; }
+</script>
+</body></html>

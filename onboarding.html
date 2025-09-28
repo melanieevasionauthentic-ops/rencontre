@@ -1,1 +1,42 @@
-<!doctype html><meta charset='utf-8'>
+
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profil • Serendi</title>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/style.css">
+</head><body>
+<header class="nav container">
+  <a href="index.html">Radar</a>
+  <a aria-current="page" href="onboarding.html">Profil</a>
+  <a href="settings.html">Réglages</a>
+  <a href="privacy.html">Vie privée</a>
+</header>
+
+<main class="container card">
+  <h1>Créer mon profil</h1>
+  <label>Nom / Pseudo</label><input id="display_name" placeholder="Ex. Léa, Sam, Alex…">
+  <label>Qui je suis — Genre</label>
+  <select id="my_gender">
+    <option></option><option>Femme</option><option>Homme</option><option>Non binaire</option><option>Trans</option>
+  </select>
+  <label>Qui je suis — Orientation (optionnel)</label>
+  <select id="my_orientation" multiple>
+    <option>Gay</option><option>Lesbienne</option><option>Bisexuel(le)</option><option>Pansexuel(le)</option><option>Asexuel(le)</option><option>Queer</option><option>Hétéro</option>
+  </select>
+  <label>Âge</label><input id="age" type="number" placeholder="Ex. 29">
+  <label>Taille (cm)</label><input id="height" type="number" placeholder="Ex. 173">
+  <label>Cheveux</label><input id="hair" placeholder="Ex. blonds">
+  <label>Type de corps</label><input id="body" placeholder="Ex. avec formes">
+  <label>Type de relation recherchée</label>
+  <select id="relation_type"><option>Amitié</option><option>Amour</option><option>Peu importe</option></select>
+  <label>Description (300 mots max)</label><textarea id="bio" maxlength="2400" placeholder="Quelques lignes…"></textarea>
+  <label>Comment me reconnaître (conseil)</label><input id="recognize" placeholder="Ex. pull vert">
+
+  <div class="row" style="margin-top:12px"><button class="btn" id="btn-save-profile">Enregistrer</button></div>
+  <small class="mono">Après “Enregistrer”, tu es renvoyée au Radar.</small>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/config.js?v=15"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js?v=15"></script>
+</body></html>

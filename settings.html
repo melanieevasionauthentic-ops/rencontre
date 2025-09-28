@@ -1,1 +1,25 @@
-<!doctype html><meta charset='utf-8'>
+
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Réglages • Serendi</title>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/style.css">
+</head><body>
+<header class="nav container">
+  <a href="index.html">Radar</a>
+  <a href="onboarding.html">Profil</a>
+  <a aria-current="page" href="settings.html">Réglages</a>
+  <a href="privacy.html">Vie privée</a>
+</header>
+
+<main class="container card">
+  <h1>Réglages</h1>
+  <label>Rayon (m)</label><input id="radius" type="number" value="1000">
+  <div style="height:10px"></div>
+  <button class="btn" id="btn-save-settings">Enregistrer</button>
+</main>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/config.js?v=15"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/app.js?v=15"></script>
+</body></html>
