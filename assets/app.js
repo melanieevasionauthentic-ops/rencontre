@@ -1,4 +1,4 @@
-// ===== Serendi v16.4.2 — persistance lieu + à propos =====
+// ===== Serendi v16.4.3 — pseudo + repère dans 'Rencontre en cours' =====
 const $ = (s) => document.querySelector(s);
 const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
 
@@ -41,13 +41,15 @@ function renderActiveMeet(){
   const when = new Date(a.at).toLocaleTimeString();
   const name = a.with_name || ('#'+(a.with_id||'????').slice(0,6));
   const place = a.place || 'Lieu non précisé';
-  box.innerHTML = `<div class="notice"><b>${name}</b> — ${when}<br>Lieu proposé : <b>${place}</b><br><button class="btn ghost" id="btn-clear-meet" style="margin-top:8px">Masquer</button></div>`;
+  const recog = a.recognize ? `<br>Repère : <b>${a.recognize}</b>` : '';
+  box.innerHTML = `<div class="notice"><b>${name}</b> — ${when}<br>Lieu proposé : <b>${place}</b>${recog}<br><button class="btn ghost" id="btn-clear-meet" style="margin-top:8px">Masquer</button></div>`;
   const b = $('#btn-clear-meet'); if (b) b.onclick = ()=>{ setActiveMeet(null); };
 }
 
 /* Carte */
 let map, meMarker;
 let markersById = new Map();
+let profilesById = new Map(); // 👈 cache profils
 let lastBeepAt = 0;
 
 function initMap(){
@@ -132,7 +134,7 @@ async function loadNearby(){
     (data||[]).forEach(r => { if (r?.id) latest.set(r.id, r); });
 
     for (const [id, mk] of markersById.entries()){
-      if (!latest.has(id)){ try{ map.removeLayer(mk); }catch(e){} markersById.delete(id); }
+      if (!latest.has(id)){ try{ map.removeLayer(mk); }catch(e){} markersById.delete(id); profilesById.delete(id); }
     }
 
     const sel = document.querySelector('#nearby-select');
@@ -144,6 +146,8 @@ async function loadNearby(){
     for (const r of latest.values()){
       if (!r.lat || !r.lon) continue;
       const prof = r.profile || {}; const id = r.id;
+      profilesById.set(id, prof); // 👈 cache profil
+
       const name = prof.display_name || ('#' + id.slice(0,6));
       const gender = (prof.gender || '').toString().trim();
       const ageTxt = (prof.age && Number(prof.age)>0) ? `${prof.age} ans` : '';
@@ -307,9 +311,13 @@ function listenIntentUpdates(){
         const place = payload?.new?.response_loc?.text;
         const withId = payload?.new?.to_id;
         if (st === 'accepted'){
+          // 🔎 Récupère pseudo & repère depuis le cache presence
+          const prof = profilesById.get(withId) || {};
+          const nm = prof.display_name || ('#'+(withId||'????').slice(0,6));
+          const recog = prof.recognize || '';
           const msg = place ? `Acceptée 🎉 — lieu proposé : ${place}` : 'Ta demande a été acceptée 🎉';
           toast(msg);
-          setActiveMeet({ with_id: withId, with_name: null, place: place||'Lieu non précisé' });
+          setActiveMeet({ with_id: withId, with_name: nm, place: place||'Lieu non précisé', recognize: recog });
         } else if (st === 'declined'){
           toast('Ta demande a été déclinée');
         }
