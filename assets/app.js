@@ -1,1 +1,3 @@
-// v14 app code placeholder — features as envoyées plus haut.
+// ===== Serendi v14 — app.js (version simplifiée, robuste) =====
+(() => {
+  const $ = s => document.querySelector
