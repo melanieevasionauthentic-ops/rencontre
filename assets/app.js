@@ -1,6 +1,6 @@
-// ===== Serendi v16.3 — intents 1h + panneau des réponses dans Profil =====
+// ===== Serendi v16.4.2 — persistance lieu + à propos =====
 const $ = (s) => document.querySelector(s);
-const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); };
+const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
 
 /* Supabase */
 let SUPA_URL='', SUPA_ANON='';
@@ -17,6 +17,33 @@ const writeProfile=(o)=>localStorage.setItem('profile', JSON.stringify(o));
 const getRadius = ()=> Number(readSettings().radius || 1000);
 function writeFlag(k,v){ localStorage.setItem('flag:'+k, JSON.stringify({v,t:Date.now()})); }
 function readFlag(k){ try{ return JSON.parse(localStorage.getItem('flag:'+k)||'{}').v; } catch(e){ return null; } }
+
+/* Rencontre active (persistante 1h) */
+function setActiveMeet(obj){
+  if (!obj){ localStorage.removeItem('active_meet'); renderActiveMeet(); return; }
+  const now = Date.now();
+  const rec = { ...obj, at: now, expires_at: now + 60*60*1000 };
+  localStorage.setItem('active_meet', JSON.stringify(rec));
+  renderActiveMeet();
+}
+function getActiveMeet(){
+  try{
+    const raw = localStorage.getItem('active_meet'); if(!raw) return null;
+    const o = JSON.parse(raw);
+    if (!o.expires_at || Date.now() > o.expires_at){ localStorage.removeItem('active_meet'); return null; }
+    return o;
+  }catch(e){ return null; }
+}
+function renderActiveMeet(){
+  const box = $('#accepted-panel'); if(!box) return;
+  const a = getActiveMeet();
+  if (!a){ box.innerHTML = '<i>Aucune rencontre active.</i>'; return; }
+  const when = new Date(a.at).toLocaleTimeString();
+  const name = a.with_name || ('#'+(a.with_id||'????').slice(0,6));
+  const place = a.place || 'Lieu non précisé';
+  box.innerHTML = `<div class="notice"><b>${name}</b> — ${when}<br>Lieu proposé : <b>${place}</b><br><button class="btn ghost" id="btn-clear-meet" style="margin-top:8px">Masquer</button></div>`;
+  const b = $('#btn-clear-meet'); if (b) b.onclick = ()=>{ setActiveMeet(null); };
+}
 
 /* Carte */
 let map, meMarker;
@@ -149,13 +176,12 @@ async function sendIntent(to_id){
   if (place) text += ` Lieu proposé : ${place}.`;
   const loc = window._lastGeo ? { lat: window._lastGeo.lat, lon: window._lastGeo.lon, radius: getRadius() } : null;
 
-  // expire après 1h
   const payload = { from_id, to_id, message: text, created_at: new Date().toISOString(),
                     expires_at: new Date(Date.now()+60*60*1000).toISOString(), loc, status: 'pending' };
   const { error } = await supa.from('intents').insert(payload);
   if (error){ toast('Intent: ' + (error.code?error.code+' ':'') + (error.message||'échec')); return; }
   toast('Demande envoyée');
-  fetchSentIntents?.(); // met à jour le panneau dans Profil si ouvert
+  fetchSentIntents?.();
 }
 
 /* Panneau demandes reçues (Radar) */
@@ -213,7 +239,7 @@ async function fetchMyIntents(){
   renderIntentsPanel(data||[]);
 }
 
-/* Panneau des demandes envoyées & réponses (Profil) — reste 1h */
+/* Panneau des demandes envoyées & réponses (Profil) */
 function renderSentIntentsPanel(items){
   const box = document.querySelector('#sent-panel'); if (!box) return;
   if (!items || !items.length){ box.innerHTML = '<i>Aucune demande envoyée dans l’heure.</i>'; return; }
@@ -244,10 +270,10 @@ async function fetchSentIntents(){
   renderSentIntentsPanel(data||[]);
 }
 
-/* Housekeeping optionnel : purge côté DB (<1h) */
+/* Ménage doux */
 async function cleanupExpiredIntents(){
   if (!supa) return;
-  const cutoff = new Date(Date.now() - 3*60*60*1000).toISOString(); // ménage large >3h
+  const cutoff = new Date(Date.now() - 3*60*60*1000).toISOString();
   try{ await supa.from('intents').delete().lt('created_at', cutoff); }catch(e){}
 }
 
@@ -274,20 +300,22 @@ function listenIntentUpdates(){
   if (!supa) return;
   const uid = localStorage.getItem('uid'); if(!uid) return;
   if (subIntentsUpdates){ try{ supa.removeChannel(subIntentsUpdates); }catch(e){} subIntentsUpdates = null; }
- subIntentsUpdates = supa.channel('intents-from-me')
-  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'intents', filter: `from_id=eq.${uid}` },
-    (payload)=>{
-      const st = payload?.new?.status;
-      const place = payload?.new?.response_loc?.text; // 👈 récupère le lieu proposé
-      if (st === 'accepted'){
-        const msg = place ? `Acceptée 🎉 — lieu proposé : ${place}` : 'Ta demande a été acceptée 🎉';
-        toast(msg);
-      } else if (st === 'declined'){
-        toast('Ta demande a été déclinée');
-      }
-      fetchSentIntents(); // met à jour le panneau "Mes demandes envoyées"
-    })
-  .subscribe();
+  subIntentsUpdates = supa.channel('intents-from-me')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'intents', filter: `from_id=eq.${uid}` },
+      (payload)=>{
+        const st = payload?.new?.status;
+        const place = payload?.new?.response_loc?.text;
+        const withId = payload?.new?.to_id;
+        if (st === 'accepted'){
+          const msg = place ? `Acceptée 🎉 — lieu proposé : ${place}` : 'Ta demande a été acceptée 🎉';
+          toast(msg);
+          setActiveMeet({ with_id: withId, with_name: null, place: place||'Lieu non précisé' });
+        } else if (st === 'declined'){
+          toast('Ta demande a été déclinée');
+        }
+        fetchSentIntents();
+      })
+    .subscribe();
 }
 
 /* UI */
@@ -355,9 +383,10 @@ function hookOnboarding(){
     }
   });
 
-  // Panneau des demandes envoyées (1h)
   fetchSentIntents();
   setInterval(fetchSentIntents, 20000);
+  renderActiveMeet();
+  setInterval(renderActiveMeet, 15000);
 }
 
 function hookSettings(){
@@ -382,7 +411,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
     if (!localStorage.getItem('uid')){ localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now()))); }
     listenIntents(); listenIntentUpdates(); fetchMyIntents();
     const rd = document.querySelector('#radius-display'); if (rd) rd.textContent = String(getRadius());
-    cleanupExpiredIntents(); // ménage doux
+    cleanupExpiredIntents();
+    renderActiveMeet();
+    setInterval(renderActiveMeet, 15000);
   }
   if (isOnb){ hookOnboarding(); }
   if (isSet){ hookSettings(); }
