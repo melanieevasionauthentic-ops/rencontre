@@ -276,15 +276,40 @@ function listenIntents(){
   subIntents = supa.channel('intents-to-me')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'intents', filter: `to_id=eq.${uid}` },
       (payload) => {
-        const fromId = payload?.new?.from_id;
-        // surlignage + popup
-        const mk = fromId ? markersById.get(fromId) : null;
-        if (mk){ mk.setStyle({ color:'#ffb703', fillColor:'#ffb703' }).bringToFront().openPopup(); }
-        // beep + toast message
-        if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
-        const msg = (payload?.new?.message || `Nouvelle demande (#${(fromId||'????').slice(0,6)})`).toString();
-        toast(msg);
-      })
+  const fromId = payload?.new?.from_id;
+
+  // surlignage + popup du marqueur de l’émetteur
+  const mk = fromId ? markersById.get(fromId) : null;
+  if (mk){ mk.setStyle({ color:'#ffb703', fillColor:'#ffb703' }).bringToFront().openPopup(); }
+
+  // bip + toast avec le texte envoyé
+  if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
+  const msg = (payload?.new?.message || `Nouvelle demande (#${(fromId||'????').slice(0,6)})`).toString();
+  toast(msg);
+
+  // 👉 rafraîchir le panneau "Demandes reçues"
+  fetchMyIntents();
+}
+let subIntentsUpdates = null;
+function listenIntentUpdates(){
+  if (!supa) return;
+  const uid = localStorage.getItem('uid'); if(!uid) return;
+
+  // on nettoie un éventuel ancien abonnement
+  if (subIntentsUpdates){ try{ supa.removeChannel(subIntentsUpdates); }catch(e){} subIntentsUpdates = null; }
+
+  subIntentsUpdates = supa.channel('intents-from-me')
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'intents',
+      filter: `from_id=eq.${uid}`
+    }, (payload)=>{
+      const st = payload?.new?.status;
+      if (st === 'accepted'){ toast('Ta demande a été acceptée 🎉'); }
+      else if (st === 'declined'){ toast('Ta demande a été déclinée'); }
+      // tu peux aussi ouvrir une popup, centrer la carte sur le lieu de réponse, etc.
+    })
     .subscribe();
 }
 
