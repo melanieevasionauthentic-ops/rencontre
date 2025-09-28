@@ -274,15 +274,20 @@ function listenIntentUpdates(){
   if (!supa) return;
   const uid = localStorage.getItem('uid'); if(!uid) return;
   if (subIntentsUpdates){ try{ supa.removeChannel(subIntentsUpdates); }catch(e){} subIntentsUpdates = null; }
-  subIntentsUpdates = supa.channel('intents-from-me')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'intents', filter: `from_id=eq.${uid}` },
-      (payload)=>{
-        const st = payload?.new?.status;
-        if (st === 'accepted'){ toast('Ta demande a été acceptée 🎉'); }
-        else if (st === 'declined'){ toast('Ta demande a été déclinée'); }
-        fetchSentIntents();
-      })
-    .subscribe();
+ subIntentsUpdates = supa.channel('intents-from-me')
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'intents', filter: `from_id=eq.${uid}` },
+    (payload)=>{
+      const st = payload?.new?.status;
+      const place = payload?.new?.response_loc?.text; // 👈 récupère le lieu proposé
+      if (st === 'accepted'){
+        const msg = place ? `Acceptée 🎉 — lieu proposé : ${place}` : 'Ta demande a été acceptée 🎉';
+        toast(msg);
+      } else if (st === 'declined'){
+        toast('Ta demande a été déclinée');
+      }
+      fetchSentIntents(); // met à jour le panneau "Mes demandes envoyées"
+    })
+  .subscribe();
 }
 
 /* UI */
