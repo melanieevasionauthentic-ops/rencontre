@@ -1,10 +1,7 @@
-// ===== Serendi v15.2 — app.js (carte OK + enregistrement + erreur lisible) =====
+// ===== Serendi v15.3 — app.js (compteur + liste + intents + surlignage) =====
 /* Utilitaires */
 const $ = (s) => document.querySelector(s);
-const toast = (m) => {
-  const t = $('#toast'); if (!t) return;
-  t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2400);
-};
+const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2400); };
 
 /* Config Supabase */
 let SUPA_URL='', SUPA_ANON='';
@@ -12,42 +9,6 @@ try { SUPA_URL = window.SERENDI_CFG?.SUPABASE_URL || ''; SUPA_ANON = window.SERE
 let supa = null;
 try { if (SUPA_URL && SUPA_ANON && window.supabase) supa = window.supabase.createClient(SUPA_URL, SUPA_ANON); }
 catch(e){ console.warn('Init Supabase échoué', e); }
-
-// ---- Réception des demandes (Realtime) ----
-let subIntents = null;
-let lastBeepAt = 0;
-function playBeep(){
-  try{
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.type='sine'; o.frequency.value=880;
-    g.gain.value=0.001; g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.18);
-    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.2);
-  }catch(e){}
-}
-
-function listenIntents(){
-  if (!supa) return;
-  const uid = localStorage.getItem('uid');
-  if (!uid) return; // l’UID est créé au premier “Disponible”
-
-  // (Re)abonnement propre
-  if (subIntents){ try{ supa.removeChannel(subIntents); }catch(e){} subIntents = null; }
-
-  subIntents = supa.channel('intents-to-me')
-    .on('postgres_changes', {
-      event: 'INSERT',
-      schema: 'public',
-      table: 'intents',
-      filter: `to_id=eq.${uid}`
-    }, (payload) => {
-      // Bip unique (anti-spam ~8s)
-      if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
-      const from = payload?.new?.from_id?.slice(0,6) || 'Inconnu';
-      toast(`Nouvelle demande (#${from})`);
-    })
-    .subscribe();
-}
 
 /* Stockage */
 const readSettings=()=>{ try{ return JSON.parse(localStorage.getItem('settings')||'{}'); }catch(e){ return {}; } };
@@ -59,22 +20,34 @@ function writeFlag(k,v){ localStorage.setItem('flag:'+k, JSON.stringify({v,t:Dat
 function readFlag(k){ try{ return JSON.parse(localStorage.getItem('flag:'+k)||'{}').v; } catch(e){ return null; } }
 
 /* Carte Leaflet */
-let map, meMarker, markers = [];
+let map, meMarker;
+let markersById = new Map();     // id -> marker
+let lastBeepAt = 0;
+
 function initMap(){
   const el = $('#map'); if (!el) return;
   try{
     map = L.map('map', { zoomControl:true, attributionControl:true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
     map.setView([48.8566, 2.3522], 13);
-  }catch(e){
-    console.error(e); toast('Erreur carte');
-  }
+  }catch(e){ console.error(e); toast('Erreur carte'); }
+}
+
+function playBeep(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='sine'; o.frequency.value=880;
+    g.gain.value=0.001; g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.18);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime+0.2);
+  }catch(e){}
 }
 
 function locateMe(){
   if(!navigator.geolocation){ toast('Géolocalisation indisponible'); return; }
   navigator.geolocation.getCurrentPosition(pos=>{
-    const { latitude, longitude } = pos.coords;window._lastGeo = { lat: latitude, lon: longitude };
+    const { latitude, longitude } = pos.coords;
+    window._lastGeo = { lat: latitude, lon: longitude };
     if (map){
       map.setView([latitude, longitude], 15);
       if (meMarker) meMarker.remove();
@@ -83,13 +56,10 @@ function locateMe(){
     if (readFlag('available')){
       upsertPresence(latitude, longitude).catch(e=>{
         console.warn('Présence KO', e);
-        // on garde la carte, on informe juste
         toast('Erreur présence: '+ (e?.message || 'inconnue'));
       });
     }
-  }, err => {
-    console.warn('geo', err); toast('Autorise la position');
-  }, { enableHighAccuracy:true, timeout:10000 });
+  }, err => { console.warn('geo', err); toast('Autorise la position'); }, { enableHighAccuracy:true, timeout:10000 });
 }
 
 /* Présence */
@@ -99,16 +69,12 @@ async function upsertPresence(lat, lon){
   const uid = localStorage.getItem('uid') || (crypto.randomUUID?.() || String(Date.now()));
   localStorage.setItem('uid', uid);
   const row = {
-    id: uid,
-    lat, lon,
-    radius_m: getRadius(),
+    id: uid, lat, lon, radius_m: getRadius(),
     bio_text: (p.bio||'').slice(0, 300),
     profile: {
       display_name: p.display_name || '',
-      age: p.age || null,
-      height: p.height || null,
-      hair: p.hair || '',
-      body: p.body || '',
+      age: p.age || null, height: p.height || null,
+      hair: p.hair || '', body: p.body || '',
       relation_type: p.relation_type || '',
       recognize: p.recognize || '',
       gender: p.my_gender || '',
@@ -119,90 +85,133 @@ async function upsertPresence(lat, lon){
   };
   const { error } = await supa.from('presence').upsert(row, { onConflict: 'id' });
   if (error){
-    // renvoyer une erreur lisible au caller, sans casser l'appli
     const err = new Error((error.code ? error.code+' ' : '') + (error.message || 'échec upsert'));
-    err.code = error.code;
-    throw err;
+    err.code = error.code; throw err;
   }
 }
 
-/* Lecture des proches */
+/* Lecture des proches + compteur */
 async function loadNearby(){
-  if (!supa || !map) return;
-  const { data, error } = await supa.from('presence')
-    .select('id,lat,lon,profile,updated_at,expires_at')
-    .gt('expires_at', new Date().toISOString())
-    .limit(500);
-  if (error){ console.warn('read presence', error); toast('Erreur lecture présence'); return; }
+  try{
+    if (!supa) return;
 
-  // dédoublonner (garder la plus récente par id)
-  const latest = new Map();
-  for (const r of (data||[])){
-    const prev = latest.get(r.id);
-    if (!prev || new Date(r.updated_at) > new Date(prev.updated_at)) latest.set(r.id, r);
-  }
+    // 1) Présences des 60 dernières minutes (tolérant)
+    const since = new Date(Date.now() - 60*60*1000).toISOString();
+    const { data, error } = await supa
+      .from('presence')
+      .select('id, lat, lon, profile, updated_at')
+      .gte('updated_at', since)
+      .order('updated_at', { ascending:false })
+      .limit(200);
 
-  // clear anciens marqueurs
-  markers.forEach(m => map.removeLayer(m)); markers = [];
+    if (error){ console.warn('presence select', error); toast('Erreur lecture présence'); return; }
 
-  // rebuild select
-  const sel = $('#nearby-select');
-  if (sel){
-    sel.innerHTML = '';
-    const o0 = document.createElement('option'); o0.value=''; o0.textContent='— choisir —'; sel.appendChild(o0);
-  }
+    // 2) dernière occurrence par id
+    const latest = new Map();
+    (data||[]).forEach(r => { if (r?.id) latest.set(r.id, r); });
 
-  for (const r of latest.values()){
-    if (!r.lat || !r.lon) continue;
-    const prof = r.profile || {};
-    const m = L.marker([r.lat, r.lon]).addTo(map);
-    markers.push(m);
-    const lines = [];
-    if (prof.display_name) lines.push(`<b>${prof.display_name}</b>`);
-    const micro = [
-      prof.age ? `Âge ${prof.age}` : '',
-      prof.height ? `${prof.height} cm` : '',
-      prof.hair ? `Cheveux ${prof.hair}` : '',
-      prof.body ? `Corps ${prof.body}` : ''
-    ].filter(Boolean).join(' — ');
-    if (micro) lines.push(micro);
-    if (prof.relation_type) lines.push(`Relation: ${prof.relation_type}`);
-    if (prof.recognize) lines.push(`Reconnaître: ${prof.recognize}`);
-    m.bindPopup(lines.join('<br>'));
-
-    if (sel){
-      const o = document.createElement('option');
-o.value = r.id;
-
-const name = prof.display_name || ('#' + r.id.slice(0,6));
-const gender = (prof.gender || '').toString().trim(); // ex. "Femme", "Homme"
-const age = (prof.age && Number(prof.age) > 0) ? `${prof.age} ans` : '';
-
-const bits = [name];
-if (gender) bits.push(gender);
-if (age) bits.push(age);
-
-o.textContent = bits.join(' · ');
-sel.appendChild(o);
-
+    // 3) nettoyer les marqueurs absents
+    for (const [id, mk] of markersById.entries()){
+      if (!latest.has(id)){ try{ map.removeLayer(mk); }catch(e){} markersById.delete(id); }
     }
-  }
+
+    // 4) rebuild la liste
+    const sel = document.querySelector('#nearby-select');
+    if (sel){
+      sel.innerHTML = '';
+      const o0 = document.createElement('option'); o0.value=''; o0.textContent='— choisir —'; sel.appendChild(o0);
+    }
+
+    // 5) créer / maj marqueurs + popup, remplir la liste
+    for (const r of latest.values()){
+      if (!r.lat || !r.lon) continue;
+
+      const prof = r.profile || {};
+      const id   = r.id;
+      const name = prof.display_name || ('#' + id.slice(0,6));
+      const gender = (prof.gender || '').toString().trim();
+      const ageTxt = (prof.age && Number(prof.age)>0) ? `${prof.age} ans` : '';
+
+      // option
+      if (sel){
+        const o = document.createElement('option');
+        o.value = id;
+        o.textContent = [name, gender, ageTxt].].filter(Boolean).join(' · ') || name;
+        sel.appendChild(o);
+      }
+
+      // marqueur (cercle)
+      let mk = markersById.get(id);
+      if (!mk){
+        mk = L.circleMarker([r.lat, r.lon], { radius: 8, color:'#4cc9f0', fillColor:'#4cc9f0', fillOpacity:0.9 }).addTo(map);
+        markersById.set(id, mk);
+      }else{
+        mk.setLatLng([r.lat, r.lon]);
+      }
+
+      const micro = [
+        gender ? gender : '',
+        prof.age ? `Âge ${prof.age}` : '',
+        prof.height ? `${prof.height} cm` : '',
+        prof.hair ? `Cheveux ${prof.hair}` : '',
+        prof.body ? `Corps ${prof.body}` : ''
+      ].filter(Boolean).join(' — ');
+
+      const lines = [];
+      if (name) lines.push(`<b>${name}</b>`);
+      if (micro) lines.push(micro);
+      if (prof.relation_type) lines.push(`Relation : ${prof.relation_type}`);
+      if (prof.recognize)     lines.push(`Reconnaître : ${prof.recognize}`);
+      mk.bindPopup(lines.join('<br>'));
+    }
+
+    // 6) compteur depuis les marqueurs affichés
+    const c = document.querySelector('#nearby-count');
+    if (c) c.textContent = String(markersById.size || 0);
+
+  }catch(e){ console.warn(e); toast('Problème chargement radar'); }
 }
 
-/* Intents (proto “je veux te rencontrer”) */
+/* Intents (envoi) */
 async function sendIntent(to_id){
   if (!supa) { toast('Supabase non configuré'); return; }
   const from_id = localStorage.getItem('uid') || (crypto.randomUUID?.() || String(Date.now()));
   localStorage.setItem('uid', from_id);
-  const payload = {
-    from_id, to_id,
-    message: 'On se croise ?',
-    created_at: new Date().toISOString(),
-    expires_at: new Date(Date.now()+30*60*1000).toISOString()
-  };
+
+  const p = readProfile();
+  const fromName = (p.display_name || `#${from_id.slice(0,6)}`).toString();
+  const place = ($('#meet_place')?.value || '').toString().trim();
+  let text = `${fromName} souhaite te rencontrer.`;
+  if (place) text += ` Lieu proposé : ${place}.`;
+  const loc = window._lastGeo ? { lat: window._lastGeo.lat, lon: window._lastGeo.lon, radius: getRadius() } : null;
+
+  const payload = { from_id, to_id, message: text, created_at: new Date().toISOString(),
+                    expires_at: new Date(Date.now()+30*60*1000).toISOString(), loc };
   const { error } = await supa.from('intents').insert(payload);
-  if (error){ console.warn('intent', error); toast('Envoi impossible'); return; }
+  if (error){ toast('Intent: ' + (error.code?error.code+' ':'') + (error.message||'échec')); return; }
   toast('Demande envoyée');
+}
+
+/* Réception intents (Realtime) */
+let subIntents = null;
+function listenIntents(){
+  if (!supa) return;
+  const uid = localStorage.getItem('uid');
+  if (!uid) return;
+  if (subIntents){ try{ supa.removeChannel(subIntents); }catch(e){} subIntents = null; }
+  subIntents = supa.channel('intents-to-me')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'intents', filter: `to_id=eq.${uid}` },
+      (payload) => {
+        const fromId = payload?.new?.from_id;
+        // surlignage + popup
+        const mk = fromId ? markersById.get(fromId) : null;
+        if (mk){ mk.setStyle({ color:'#ffb703', fillColor:'#ffb703' }).bringToFront().openPopup(); }
+        // beep + toast message
+        if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
+        const msg = (payload?.new?.message || `Nouvelle demande (#${(fromId||'????').slice(0,6)})`).toString();
+        toast(msg);
+      })
+    .subscribe();
 }
 
 /* UI */
@@ -216,14 +225,10 @@ function wireUI(){
     btnAvail.addEventListener('click', ()=>{
       writeFlag('available', true);
       toast('Visible (60 min)');
-      locateMe(); // localise + envoie présence
+      if (!localStorage.getItem('uid')){ localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now()))); }
+      locateMe();
+      listenIntents();
     });
-        // S’assurer que l’UID existe et écouter en temps réel
-    if (!localStorage.getItem('uid')){
-      localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now())));
-    }
-    listenIntents();
-
   }
   if (btnStealth){
     btnStealth.addEventListener('click', ()=>{
@@ -281,13 +286,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if (isRadar){
     initMap(); wireUI(); locateMe();
     setInterval(loadNearby, 12000); loadNearby();
+    if (!localStorage.getItem('uid')){ localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now()))); }
+    listenIntents();
     const rd = $('#radius-display'); if (rd) rd.textContent = String(getRadius());
   }
   if (isOnb) hookOnboarding();
   if (isSet) hookSettings();
 });
-    // Garantir un uid local puis écouter les intents entrants
-    if (!localStorage.getItem('uid')){
-      localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now())));
-    }
-    listenIntents();
+
