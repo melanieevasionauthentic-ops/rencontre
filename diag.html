@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<link rel="stylesheet" href="assets/style.css">
+<main class="container card">
+  <h1>Diagnostic</h1>
+  <p><b>Config Supabase</b> : <code id="cfg"></code></p>
+  <p><b>Leaflet</b> : <code id="leaf"></code></p>
+  <p><b>Géolocalisation</b> : <code id="geo"></code></p>
+  <div id="map" class="mapbox" style="margin-top:12px"></div>
+</main>
+<script src="assets/config.js?v=14"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Affiche config
+  const c = window.SERENDI_CFG||{};
+  document.getElementById('cfg').textContent = (c.SUPABASE_URL && c.SUPABASE_ANON) ? 'OK' : 'MANQUANTE';
+
+  // Leaflet test
+  try{
+    const m = L.map('map'); 
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+    m.setView([48.8566,2.3522], 12);
+    document.getElementById('leaf').textContent = 'OK';
+  }catch(e){
+    document.getElementById('leaf').textContent = 'ERREUR';
+  }
+
+  // Geoloc test
+  if(navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      ()=>document.getElementById('geo').textContent='OK',
+      ()=>document.getElementById('geo').textContent='REFUSÉ (autorise la position)');
+  }else{
+    document.getElementById('geo').textContent = 'INDISPONIBLE';
+  }
+</script>
