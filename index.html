@@ -1,74 +1,34 @@
-<!doctype html>
-<html lang="fr">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Radar • Serendi</title>
-  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/style.css?v=11"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
-  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-</head>
-<body>
-<header class="nav container">
-  <div class="brand"><strong>Serendi</strong></div>
-  <nav class="row" aria-label="Navigation principale">
-    <a aria-current="page" href="index.html">Radar</a>
-    <a href="onboarding.html">Profil</a>
-    <a href="settings.html">Réglages</a>
-    <a href="privacy.html">Vie privée</a>
-  </nav>
-</header>
-
+<!doctype html><html lang="fr"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Radar • Serendi</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/style.css?v=12"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+</head><body>
+<header class="nav container"><div class="brand"><strong>Serendi</strong></div><nav class="row" aria-label="Navigation principale"><a aria-current="page" href="index.html">Radar</a><a href="onboarding.html">Profil</a><a href="settings.html">Réglages</a><a href="privacy.html">Vie privée</a></nav></header>
 <main class="container grid">
-  <section class="card">
-    <h1>Rencontres comme avant</h1>
-    <p><b>Sans photo. Sans swipe. Sans jugement.</b> On se croise, on se parle, et si le feeling passe…</p>
-  </section>
-
-  <section class="card">
-    <h2>Radar de proximité</h2>
-    <div class="grid grid-2" style="align-items:start">
-      <div>
-        <div id="map" class="mapbox" aria-label="Carte"></div>
-        <div class="row" style="margin-top:12px">
-          <button class="btn" id="btn-available">Disponible (60 min)</button>
-          <button class="btn ghost" id="btn-stealth">Mettre en pause (3 h)</button>
-        </div>
-        <small id="avail-text">Vous n’êtes pas visible. Vous recevez quand même les notifications.</small>
-      </div>
-      <div class="card">
-        <h2>Mon résumé</h2>
-        <div id="profile-summary"><small>Crée ou complète ton profil.</small></div>
-        <hr/>
-        <h2>Proximités</h2>
-        <p class="kpi"><span class="v">0</span>&nbsp;<span class="mono">à ~<span id="radius-display">1000</span> m</span></p>
-        <label>Personnes proches</label>
-        <select id="nearby-select"></select>
-        <div style="height:8px"></div>
-        <button class="btn" id="btn-request">Je veux rencontrer cette personne</button>
-        <hr/>
-        <p id="nearby-desc"><i>En attente d’une proximité…</i></p>
-      </div>
+<section class="card"><h1>Rencontres comme avant</h1><p><b>Sans photo. Sans swipe. Sans jugement.</b> On se croise, on se parle…</p></section>
+<section class="card"><h2>Radar de proximité</h2>
+<div class="grid grid-2" style="align-items:start">
+  <div>
+    <div id="map" class="mapbox" aria-label="Carte"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="btn-available">Disponible (60 min)</button>
+      <button class="btn ghost" id="btn-stealth">Mettre en pause (3 h)</button>
     </div>
-  </section>
-</main>
-
+    <small id="avail-text">Vous n’êtes pas visible. Vous recevez quand même les notifications.</small>
+  </div>
+  <div class="card">
+    <h2>Mon résumé</h2><div id="profile-summary"><small>Crée ou complète ton profil.</small></div><hr/>
+    <h2>Proximités</h2><p class="kpi"><span class="v">0</span>&nbsp;<span class="mono">à ~<span id="radius-display">1000</span> m</span></p>
+    <label>Personnes proches</label><select id="nearby-select"></select>
+    <div style="height:8px"></div><button class="btn" id="btn-request">Je veux rencontrer cette personne</button><hr/>
+    <p id="nearby-desc"><i>En attente d’une proximité…</i></p>
+  </div>
+</div>
+</section></main>
 <footer class="container"><div>© 2025 Serendi.</div></footer>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
-
-<!-- Bandeau auto-test -->
-<div style="position:fixed;top:8px;left:8px;font:12px ui-monospace;color:#fff;background:#0008;border:1px solid #fff3;padding:6px;border-radius:10px" id="selftest">init…</div>
-<script>
-(function(){
-  const ok=(i,b)=>document.getElementById('selftest').textContent += ' '+i+':' + (b?'OK':'KO');
-  ok('css', !!document.styleSheets.length);
-  ok('leaflet', !!window.L);
-  ok('map', !!document.getElementById('map'));
-})();
-</script>
-
-<script src="assets/config.js?v=11"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/app.js?v=11"></script>
+<script src="assets/config.js?v=12"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="assets/app.js?v=12"></script>
 </body></html>
