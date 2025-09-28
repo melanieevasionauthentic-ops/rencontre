@@ -57,7 +57,7 @@ async function upsertPresence(lat,lon){
     expires_at:new Date(Date.now()+60*60*1000).toISOString()
   };
   const {error}=await supa.from('presence').upsert(row,{onConflict:'id'});
-  if(error) throw error;
+  if (error) { toast('Erreur présence: '+ (error.message||'inconnue')); throw error; }
 }
 async function loadNearby(){
   if(!supa||!map) return;
