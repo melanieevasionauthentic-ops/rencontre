@@ -218,6 +218,12 @@ function wireUI(){
       toast('Visible (60 min)');
       locateMe(); // localise + envoie présence
     });
+        // S’assurer que l’UID existe et écouter en temps réel
+    if (!localStorage.getItem('uid')){
+      localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now())));
+    }
+    listenIntents();
+
   }
   if (btnStealth){
     btnStealth.addEventListener('click', ()=>{
