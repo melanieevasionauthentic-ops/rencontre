@@ -1,3 +1,26 @@
+// --- PATCH CARTE (ne pas supprimer) ---
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const el = document.getElementById('map');
+    if (!el || !window.L) return;         // pas de conteneur carte = pas de carte
+    const map = L.map('map').setView([48.8566, 2.3522], 13); // Paris par défaut
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19, attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+    window.__SERENDI_MAP = map;           // utile plus tard
+    // Essaie d’utiliser ta vraie géoloc si autorisée
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { map.setView([pos.coords.latitude, pos.coords.longitude], 15); },
+        () => {} // on laisse Paris si refus
+      );
+    }
+  } catch(e) {
+    alert('Erreur carte: ' + e.message);
+  }
+});
+// --- FIN PATCH CARTE ---
+
 const $ = s => document.querySelector(s);
 const toast = (m)=>{const t=$("#toast"); if(!t) return; t.textContent=m; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),2200);};
 
