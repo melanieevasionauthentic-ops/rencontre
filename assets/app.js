@@ -74,7 +74,7 @@ function initMap(){
 function locateMe(){
   if(!navigator.geolocation){ toast('Géolocalisation indisponible'); return; }
   navigator.geolocation.getCurrentPosition(pos=>{
-    const { latitude, longitude } = pos.coords;
+    const { latitude, longitude } = pos.coords;window._lastGeo = { lat: latitude, lon: longitude };
     if (map){
       map.setView([latitude, longitude], 15);
       if (meMarker) meMarker.remove();
