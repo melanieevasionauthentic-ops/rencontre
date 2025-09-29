@@ -91,6 +91,73 @@ function locateMe(){
     }
   }, err => { console.warn('geo', err); toast('Autorise la position'); }, { enableHighAccuracy:true, timeout:10000 });
 }
+// Distance en mètres (Haversine)
+function distanceMeters(a, b){
+  if (!a || !b) return Infinity;
+  const R = 6371000;
+  const toRad = x => x * Math.PI/180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLon = toRad(b.lon - a.lon);
+  const lat1 = toRad(a.lat);
+  const lat2 = toRad(b.lat);
+  const x = Math.sin(dLat/2)**2 + Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(x));
+}
+// Carillon (plus doux que un “bip”)
+function playChime(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const now = ac.currentTime;
+    const notes = [880, 1174, 1568]; // La5, Ré6, Sol#6
+    notes.forEach((f, i) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, now + i*0.02);
+      g.gain.exponentialRampToValueAtTime(0.05, now + i*0.04);
+      g.gain.exponentialRampToValueAtTime(0.00001, now + 0.35 + i*0.02);
+      o.connect(g); g.connect(ac.destination);
+      o.start(now + i*0.02); o.stop(now + 0.4 + i*0.02);
+    });
+  }catch(e){}
+}
+// Notif système (si autorisée) + repli toast
+function notifyClose(title, body){
+  const showToast = () => toast((title ? title+': ' : '') + (body||''));
+  try{
+    if (!('Notification' in window)) { showToast(); playChime(); return; }
+    if (Notification.permission === 'granted'){
+      new Notification(title || 'À proximité', { body: body||'Quelqu’un est tout près (≤5 m) !' });
+      playChime();
+    } else if (Notification.permission !== 'denied'){
+      Notification.requestPermission().then(p=>{
+        if (p === 'granted'){
+          new Notification(title || 'À proximité', { body: body||'Quelqu’un est tout près (≤5 m) !' });
+          playChime();
+        } else {
+          showToast(); playChime();
+        }
+      });
+    } else {
+      showToast(); playChime();
+    }
+  }catch(e){ showToast(); playChime(); }
+}
+
+// Anti-spam : mémoriser “déjà notifié” pendant 10 min
+function markCloseNotified(id){
+  const key = 'near-notif:'+id;
+  localStorage.setItem(key, JSON.stringify({t: Date.now()}));
+}
+function isCloseNotified(id){
+  try{
+    const key = 'near-notif:'+id;
+    const v = JSON.parse(localStorage.getItem(key)||'null');
+    if (!v) return false;
+    // expire après 10 min
+    return (Date.now() - (v.t||0)) < 10*60*1000;
+  }catch(e){ return false; }
+}
 
 /* Présence */
 async function upsertPresence(lat, lon){
