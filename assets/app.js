@@ -1,10 +1,10 @@
-// ===== Serendi app.js — Radar, Profil, Intents, Proximité 5 m =====
+// ===== Serendi app.js — Radar, Profil, Intents, Proximité 5 m, Notifs sonores =====
 
 // Utils DOM + toast
 const $ = (s) => document.querySelector(s);
 const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
 
-// ---------- Notifications & proximité (nouveau) ----------
+// ---------- Notifications & proximité ----------
 
 // Distance Haversine (m)
 function distanceMeters(a, b){
@@ -16,7 +16,8 @@ function distanceMeters(a, b){
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
-// Carillon doux (3 notes)
+// --- Sons ---
+// Carillon (proximité ≤5m)
 function playChime(){
   try{
     const ac = new (window.AudioContext||window.webkitAudioContext)();
@@ -32,27 +33,56 @@ function playChime(){
     });
   }catch(e){}
 }
-
-// Notif système + repli toast
-function notifyClose(title, body){
-  const showToast = () => toast((title?title+': ':'') + (body||'Quelqu’un est tout près (≤5 m) !'));
+// Ping (nouvelle demande reçue)
+function playPing(){
   try{
-    if (!('Notification' in window)) { showToast(); playChime(); return; }
-    if (Notification.permission === 'granted'){
-      new Notification(title||'À proximité', { body: body||'Quelqu’un est tout près (≤5 m) !' });
-      playChime();
-    } else if (Notification.permission !== 'denied'){
-      Notification.requestPermission().then(p=>{
-        if (p==='granted'){
-          new Notification(title||'À proximité', { body: body||'Quelqu’un est tout près (≤5 m) !' });
-          playChime();
-        } else { showToast(); playChime(); }
-      });
-    } else { showToast(); playChime(); }
-  }catch(e){ showToast(); playChime(); }
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type='triangle'; o.frequency.value=1200;
+    g.gain.value=0.001;
+    g.gain.exponentialRampToValueAtTime(0.08, ac.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.25);
+    o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime+0.28);
+  }catch(e){}
+}
+// Reply (réponse à TA demande)
+function playReply(){
+  try{
+    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const o1 = ac.createOscillator(), g1 = ac.createGain();
+    const o2 = ac.createOscillator(), g2 = ac.createGain();
+    o1.type='sine'; o1.frequency.value=740; // Fa#5
+    o2.type='sine'; o2.frequency.value=988; // Si5
+    g1.gain.value=0.0001; g2.gain.value=0.0001;
+    g1.gain.exponentialRampToValueAtTime(0.06, ac.currentTime+0.02);
+    g2.gain.exponentialRampToValueAtTime(0.05, ac.currentTime+0.06);
+    g1.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.3);
+    g2.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.34);
+    o1.connect(g1); g1.connect(ac.destination);
+    o2.connect(g2); g2.connect(ac.destination);
+    o1.start(); o2.start(ac.currentTime+0.04);
+    o1.stop(ac.currentTime+0.32); o2.stop(ac.currentTime+0.36);
+  }catch(e){}
 }
 
-// Anti-spam notif (10 min)
+// Notif système générique + repli toast
+function notifySystem(title, body){
+  const showToast = () => toast((title?title+': ':'') + (body||''));
+  try{
+    if (!('Notification' in window)) { showToast(); return; }
+    if (Notification.permission === 'granted'){
+      new Notification(title||'Notification', { body: body||'' });
+    } else if (Notification.permission !== 'denied'){
+      Notification.requestPermission().then(p=>{
+        if (p==='granted') new Notification(title||'Notification', { body: body||'' });
+        else showToast();
+      });
+    } else showToast();
+  }catch(e){ showToast(); }
+}
+
+// Anti-spam notif proximité (10 min)
 function markCloseNotified(id){ localStorage.setItem('near-notif:'+id, JSON.stringify({t:Date.now()})); }
 function isCloseNotified(id){
   try{
@@ -122,7 +152,7 @@ function initMap(){
   }catch(e){ console.error(e); toast('Erreur carte'); }
 }
 
-function playBeep(){ // bip court (déjà en place pour intents)
+function playBeep(){ // (historique) petit bip court
   try{
     const ac = new (window.AudioContext||window.webkitAudioContext)();
     const o = ac.createOscillator(), g = ac.createGain();
@@ -241,7 +271,8 @@ async function loadNearby(){
               const prof = profilesById.get(id) || {};
               const name = prof.display_name || ('#'+id.slice(0,6));
               const recog = prof.recognize ? ` (${prof.recognize})` : '';
-              notifyClose('Très proche', `${name}${recog} est à ~${Math.max(1, Math.round(dist))} m`);
+              notifySystem('Très proche', `${name}${recog} est à ~${Math.max(1, Math.round(dist))} m`);
+              playChime();
               markCloseNotified(id);
             }
             try{ mk.setStyle?.({ color:'#ffd166', fillColor:'#ffd166' }); }catch(e){}
@@ -376,9 +407,13 @@ function listenIntents(){
         const fromId = payload?.new?.from_id;
         const mk = fromId ? markersById.get(fromId) : null;
         if (mk){ mk.setStyle({ color:'#ffb703', fillColor:'#ffb703' }).bringToFront().openPopup(); }
-        if (Date.now() - lastBeepAt > 8000) { playBeep(); lastBeepAt = Date.now(); }
         const msg = (payload?.new?.message || `Nouvelle demande (#${(fromId||'????').slice(0,6)})`).toString();
-        toast(msg);
+
+        // Notif + son "ping" pour DEMANDE REÇUE
+        notifySystem('Demande de rencontre', msg);
+        playPing();
+
+        // Panneau
         fetchMyIntents();
       })
     .subscribe();
@@ -397,10 +432,16 @@ function listenIntentUpdates(){
           const prof = profilesById.get(withId) || {};
           const nm = prof.display_name || ('#'+(withId||'????').slice(0,6));
           const recog = prof.recognize || '';
-          const msg = place ? `Acceptée 🎉 — lieu proposé : ${place}` : 'Ta demande a été acceptée 🎉';
-          toast(msg);
+          const msg = place ? `Acceptée 🎉 — lieu : ${place}` : 'Ta demande a été acceptée 🎉';
+
+          // Notif + son "reply" pour RÉPONSE REÇUE
+          notifySystem('Réponse reçue', msg);
+          playReply();
+
           setActiveMeet({ with_id: withId, with_name: nm, place: place||'Lieu non précisé', recognize: recog });
         } else if (st === 'declined'){
+          notifySystem('Réponse reçue', 'Ta demande a été déclinée');
+          playReply();
           toast('Ta demande a été déclinée');
         }
         fetchSentIntents();
@@ -506,3 +547,4 @@ document.addEventListener('DOMContentLoaded', ()=>{
   if (isOnb){ hookOnboarding(); }
   if (isSet){ hookSettings(); }
 });
+
