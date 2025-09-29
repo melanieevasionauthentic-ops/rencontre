@@ -54,4 +54,46 @@ header {
 @media (max-width: 720px) {
   header .logo img { height: 56px; }
 }
+/* Logo en colonne: texte sous l'icône */
+header .logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  gap: 4px; /* espace entre logo et texte */
+}
+
+header .logo img {
+  height: 56px;   /* ajuste si tu veux plus grand (64/72px) */
+  width: auto;
+}
+
+header .logo strong {
+  display: block;
+  font-size: 0.95rem; /* taille du mot “Serendi” */
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+/* Le header reste bien calé même sur mobile */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap; /* évite que le menu saute */
+}
+
+header nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Petits écrans : resserrer un peu pour ne pas pousser le menu */
+@media (max-width: 720px) {
+  header .logo img { height: 52px; }
+  header .logo strong { font-size: 0.9rem; }
+  header nav { gap: 8px; }
+}
 
