@@ -1,88 +1,293 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Serendi — Rencontres à l’ancienne</title>
-<link rel="icon" href="assets/logo.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/style.css">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2.43.4/dist/umd/supabase.js"></script>
-<script src="assets/config.js"></script>
-<script defer src="assets/app.js"></script>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Serendi — Créer mon profil</title>
+  <link rel="icon" href="./assets/favicon.svg" />
+  <link rel="stylesheet" href="./assets/style.css?v=1" />
+  <style>
+    /* Petite aide visuelle pour les champs "Autre" */
+    .other-input{margin-top:8px;display:none}
+    .grid-2{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width: 880px){.grid-2{grid-template-columns:1fr}}
+    .hint{color:var(--muted);font-size:0.95rem}
+  </style>
 </head>
 <body>
-
-<header>
-  <a class="logo" href="index.html"><img src="assets/logo.svg" alt="logo"><strong>Serendi</strong></a>
-  <nav>
-    <a href="index.html" class="active">Radar</a>
-    <a href="onboarding.html">Profil</a>
-    <a href="settings.html">Réglages</a>
-    <a href="privacy.html">Vie privée</a>
-    <a href="apropos.html">À propos</a>
-    <a href="diag.html">Diag</a>
+  <nav class="nav">
+    <div class="brand">Serendi</div>
+    <div class="nav">
+      <a class="chip" href="./index.html">Radar</a>
+      <a class="chip active" href="./onboarding.html">Profil</a>
+      <a class="chip" href="./settings.html">Réglages</a>
+      <a class="chip" href="./privacy.html">Vie privée</a>
+    </div>
   </nav>
-</header>
 
-<main class="container">
-  <div class="card">
-    <h1>Mon profil</h1>
-    <div class="grid">
-      <label>Nom / Pseudo
-        <input id="display_name" placeholder="ex: Eva">
-      </label>
-      <label>Genre
-        <select id="my_gender">
-          <option value="">—</option>
-          <option>Femme</option><option>Homme</option><option>Non-binaire</option><option>Autre</option>
-        </select>
-      </label>
-      <label>Orientation (Ctrl/Cmd pour multi)
-        <select id="my_orientation" multiple>
-          <option>Hétéro</option><option>Gay</option><option>Lesbienne</option><option>Bi</option><option>Pan</option><option>Asexuel·le</option>
-        </select>
-      </label>
-      <label>Âge
-        <input id="age" type="number" min="18" max="99">
-      </label>
-      <label>Taille (cm)
-        <input id="height" type="number" min="120" max="230">
-      </label>
-      <label>Cheveux
-        <input id="hair" placeholder="bruns, blonds…">
-      </label>
-      <label>Type de corps
-        <input id="body" placeholder="athlétique, normal…">
-      </label>
-      <label>Type de relation
-        <input id="relation_type" placeholder="amitié, amour…">
-      </label>
-      <label>Comment me reconnaître
-        <input id="recognize" placeholder="manteau rouge, robe noire…">
-      </label>
-      <label style="grid-column:1/-1">Bio (300 max utile sur radar)
-        <textarea id="bio" rows="4" placeholder="Quelques mots sur toi…"></textarea>
-      </label>
-    </div>
-    <div class="row" style="margin-top:12px">
-      <button class="btn" id="btn-save-profile">Enregistrer</button>
-    </div>
-  </div>
+  <main class="container" style="padding-top: 12px;">
+    <section class="card">
+      <h1>Créer mon profil</h1>
+      <p class="hint">Les infos restent sur ton appareil (enregistrées automatiquement). Certaines peuvent être partagées aux autres quand tu te rends visible.</p>
 
-  <div class="card">
-    <h2>Mes demandes envoyées (dernière heure)</h2>
-    <div id="sent-panel" class="card" style="background:#21122f"><i>Aucune demande envoyée dans l’heure.</i></div>
-  </div>
+      <!-- IDENTITÉ DE BASE -->
+      <div class="grid-2">
+        <div>
+          <label for="display_name">Nom / Pseudo</label>
+          <input id="display_name" placeholder="Ex. Léa, Sam, Alex…" />
+        </div>
 
-  <div class="card">
-    <h2>Rencontre en cours</h2>
-    <div id="accepted-panel" class="card" style="background:#21122f"><i>Aucune rencontre active.</i></div>
-  </div>
-</main>
-<div id="toast"></div>
+        <div>
+          <label for="relation_type">Type de relation recherchée</label>
+          <select id="relation_type" multiple>
+            <option value="Amitié">Amitié</option>
+            <option value="Rencontre">Rencontre</option>
+            <option value="Relation sérieuse">Relation sérieuse</option>
+            <option value="Sortie">Sortie</option>
+            <option value="Conversation">Conversation</option>
+            <option value="Autre">Autre (préciser)</option>
+          </select>
+          <input id="relation_type_other" class="other-input" placeholder="Préciser…" />
+        </div>
+      </div>
+
+      <!-- QUI JE SUIS -->
+      <h2 style="margin-top:24px">Qui je suis</h2>
+
+      <div class="grid-2">
+        <div>
+          <label for="my_gender">Genre (multi)</label>
+          <select id="my_gender" multiple>
+            <option value="Femme">Femme</option>
+            <option value="Homme">Homme</option>
+            <option value="Personne non binaire">Personne non binaire</option>
+            <option value="Personne trans">Personne trans</option>
+            <option value="Autre">Autre (préciser)</option>
+          </select>
+          <input id="my_gender_other" class="other-input" placeholder="Préciser…" />
+        </div>
+
+        <div>
+          <label for="my_orientation">Orientation (optionnel, multi)</label>
+          <select id="my_orientation" multiple>
+            <option value="Gay">Gay</option>
+            <option value="Lesbienne">Lesbienne</option>
+            <option value="Bisexuel(le)">Bisexuel(le)</option>
+            <option value="Pansexuel(le)">Pansexuel(le)</option>
+            <option value="Asexuel(le)">Asexuel(le)</option>
+            <option value="Queer">Queer</option>
+            <option value="Hétéro">Hétéro</option>
+            <option value="Autre">Autre (préciser)</option>
+          </select>
+          <input id="my_orientation_other" class="other-input" placeholder="Préciser…" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div>
+          <label for="age">Âge</label>
+          <input id="age" inputmode="numeric" placeholder="Ex. 29" />
+        </div>
+        <div>
+          <label for="height">Taille (cm)</label>
+          <input id="height" inputmode="numeric" placeholder="Ex. 173" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div>
+          <label for="hair">Couleur de cheveux</label>
+          <input id="hair" placeholder="Ex. Blonds" />
+        </div>
+        <div>
+          <label for="body">Type de corps</label>
+          <input id="body" placeholder="Ex. Avec formes" />
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div>
+          <label for="religion">Religion (optionnel)</label>
+          <input id="religion" placeholder="Ex. —" />
+        </div>
+        <div>
+          <label for="diet">Régime (optionnel)</label>
+          <input id="diet" placeholder="Ex. Végétarien" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="bio">Petite description (≤ 300 mots)</label>
+        <textarea id="bio" placeholder="Ce qu’on devrait savoir de toi…"></textarea>
+      </div>
+
+      <div style="margin-top:12px">
+        <label for="recognize">Comment me reconnaître</label>
+        <input id="recognize" placeholder="Ex. manteau rouge, casquette bleue…" />
+      </div>
+
+      <!-- CE QUE JE RECHERCHE -->
+      <h2 style="margin-top:24px">Ce que je recherche</h2>
+
+      <div class="grid-2">
+        <div>
+          <label>Genre(s) souhaité(s)</label>
+          <div class="row">
+            <label class="check"><input type="checkbox" id="seek_women" /> Femmes</label>
+            <label class="check"><input type="checkbox" id="seek_men" /> Hommes</label>
+            <label class="check"><input type="checkbox" id="seek_nb" /> Personnes non binaires</label>
+            <label class="check"><input type="checkbox" id="seek_trans" /> Personnes trans</label>
+          </div>
+        </div>
+
+        <div>
+          <label>Tranches d’âge souhaitées</label>
+          <div class="row">
+            <input id="want_age_min" inputmode="numeric" placeholder="Âge min." />
+            <input id="want_age_max" inputmode="numeric" placeholder="Âge max." />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:12px">
+        <div>
+          <label>Taille souhaitée (cm)</label>
+          <div class="row">
+            <input id="want_h_min" inputmode="numeric" placeholder="Min." />
+            <input id="want_h_max" inputmode="numeric" placeholder="Max." />
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap">
+        <button class="btn" onclick="saveProfileAndGo()">Enregistrer</button>
+        <button class="btn ghost" onclick="history.back()">Annuler</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <!-- Config + App (les helpers et l’autosave sont dans app.js) -->
+  <script src="./assets/config.js?v=1"></script>
+  <script src="./assets/app.js?v=1"></script>
+
+  <script>
+    // === Pré-remplissage & autosave (s’appuie sur app.js déjà présent) ===
+
+    // Helpers "multi + Autre" — au cas où ils ne sont pas déjà dans app.js
+    if (typeof getMultiWithOther === 'undefined') {
+      window.getMultiWithOther = function(selId){
+        const sel = document.getElementById(selId);
+        const other = document.getElementById(selId + '_other');
+        const values = Array.from(sel.selectedOptions).map(o => o.value);
+        const hasOther = values.includes('Autre');
+        if (other) other.style.display = hasOther ? '' : 'none';
+        if (hasOther && other.value.trim()) values.push('Autre:' + other.value.trim());
+        return values;
+      };
+      window.setMultiWithOther = function(selId, values = []){
+        const sel = document.getElementById(selId);
+        const other = document.getElementById(selId + '_other');
+        if (!sel) return;
+        const plain = []; let otherVal = '';
+        (values || []).forEach(v=>{
+          if (typeof v !== 'string') return;
+          if (v.startsWith('Autre:')) otherVal = v.slice(6).trim();
+          else plain.push(v);
+        });
+        Array.from(sel.options).forEach(opt=>{
+          opt.selected = plain.includes(opt.value) || (opt.value==='Autre' && otherVal);
+        });
+        if (other){
+          other.style.display = (otherVal || Array.from(sel.selectedOptions).some(o=>o.value==='Autre')) ? '' : 'none';
+          if (otherVal) other.value = otherVal;
+        }
+      };
+    }
+
+    if (typeof autosaveProfile === 'undefined') {
+      let saveTimer=null;
+      window.autosaveProfile = (p)=>{ clearTimeout(saveTimer); saveTimer=setTimeout(()=>{ try{localStorage.setItem('profile',JSON.stringify(p));}catch(e){} },250);};
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // 1) Pré-remplir depuis localStorage
+      let p={}; try{ p = JSON.parse(localStorage.getItem('profile')||'{}'); }catch(e){}
+      if (p.display_name) document.getElementById('display_name').value = p.display_name;
+      if (p.age) document.getElementById('age').value = p.age;
+      if (p.height) document.getElementById('height').value = p.height;
+      if (p.hair) document.getElementById('hair').value = p.hair;
+      if (p.body) document.getElementById('body').value = p.body;
+      if (p.religion) document.getElementById('religion').value = p.religion;
+      if (p.diet) document.getElementById('diet').value = p.diet;
+      if (p.bio) document.getElementById('bio').value = p.bio;
+      if (p.recognize) document.getElementById('recognize').value = p.recognize;
+
+      setMultiWithOther('my_gender', p.my_gender);
+      setMultiWithOther('my_orientation', p.my_orientation);
+      setMultiWithOther('relation_type', p.relation_type);
+
+      if (p.seek){ // compat avec ancienne structure
+        document.getElementById('seek_women').checked = !!p.seek.women;
+        document.getElementById('seek_men').checked   = !!p.seek.men;
+        document.getElementById('seek_nb').checked    = !!p.seek.nb;
+        document.getElementById('seek_trans').checked = !!p.seek.trans;
+      }
+      if (p.want){
+        if (p.want.age){ document.getElementById('want_age_min').value = p.want.age[0]||''; document.getElementById('want_age_max').value = p.want.age[1]||''; }
+        if (p.want.height){ document.getElementById('want_h_min').value = p.want.height[0]||''; document.getElementById('want_h_max').value = p.want.height[1]||''; }
+      }
+
+      // 2) Autosave à chaque changement
+      const all = document.querySelectorAll('input, textarea, select');
+      all.forEach(el=>{
+        el.addEventListener('change', collectAndSave);
+        el.addEventListener('input', collectAndSave);
+      });
+    });
+
+    function collectAndSave(){
+      const p = {
+        display_name: document.getElementById('display_name').value.trim(),
+        age: Number(document.getElementById('age').value)||null,
+        height: Number(document.getElementById('height').value)||null,
+        hair: document.getElementById('hair').value.trim(),
+        body: document.getElementById('body').value.trim(),
+        religion: document.getElementById('religion').value.trim(),
+        diet: document.getElementById('diet').value.trim(),
+        bio: (document.getElementById('bio').value||'').slice(0,300),
+        recognize: document.getElementById('recognize').value.trim(),
+
+        my_gender: getMultiWithOther('my_gender'),
+        my_orientation: getMultiWithOther('my_orientation'),
+        relation_type: getMultiWithOther('relation_type'),
+
+        seek:{
+          women: document.getElementById('seek_women').checked,
+          men:   document.getElementById('seek_men').checked,
+          nb:    document.getElementById('seek_nb').checked,
+          trans: document.getElementById('seek_trans').checked
+        },
+        want:{
+          age:[ Number(document.getElementById('want_age_min').value)||null,
+                Number(document.getElementById('want_age_max').value)||null ],
+          height:[ Number(document.getElementById('want_h_min').value)||null,
+                   Number(document.getElementById('want_h_max').value)||null ]
+        }
+      };
+      autosaveProfile(p);
+    }
+
+    async function saveProfileAndGo(){
+      collectAndSave(); // force une dernière sauvegarde locale
+      let p={}; try{ p = JSON.parse(localStorage.getItem('profile')||'{}'); }catch(e){}
+      try{
+        if (window.saveProfileToSupabase) await window.saveProfileToSupabase(p);
+      }catch(e){ console.warn('Sync Supabase profil ignorée:', e); }
+      window.location.href = './index.html';
+    }
+  </script>
 </body>
 </html>
+
