@@ -33,3 +33,25 @@ footer{padding:24px 16px;color:#cdb7e6;text-align:center}
 .badge.ok{border-color:#47e082}
 .badge.no{border-color:#ff7b7b}
 .notice{background:#221332;border:1px dashed var(--accent);padding:10px;border-radius:12px}
+/* Logo plus grand, même forme/couleur */
+header .logo img {
+  height: 64px;     /* ← règle la taille ici (ex. 72px si tu veux encore plus grand) */
+  width: auto;
+}
+
+/* Optionnel : un peu plus de présence pour le nom */
+header .logo strong {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* Garde tout aligné quand le logo grandit */
+header {
+  align-items: center;
+}
+
+/* Sur mobile, un cran en-dessous pour éviter que ça serre le menu */
+@media (max-width: 720px) {
+  header .logo img { height: 56px; }
+}
+
