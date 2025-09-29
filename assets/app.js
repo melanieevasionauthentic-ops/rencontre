@@ -4,6 +4,29 @@
 const $ = (s) => document.querySelector(s);
 const toast = (m) => { const t=$('#toast'); if(!t) return; t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); };
 
+// ===== Audio global & déverrouillage =====
+let AC = null;
+function getAC(){
+  if (AC && AC.state !== 'closed') return AC;
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); return AC; }
+  catch(e){ return null; }
+}
+function unlockAudio(){
+  const ac = getAC(); if (!ac) return;
+  if (ac.state === 'suspended') { ac.resume?.(); }
+  try {
+    // petit “tic” inaudible pour autoriser la sortie audio
+    const o = ac.createOscillator(), g = ac.createGain();
+    g.gain.value = 0.00001; o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + 0.01);
+  } catch(e){}
+}
+// 1ère interaction : on déverrouille
+document.addEventListener('click', unlockAudio, { once:true });
+document.addEventListener('touchstart', unlockAudio, { once:true });
+// Quand l’onglet redevient visible, on s’assure que l’audio est prêt
+document.addEventListener('visibilitychange', ()=>{ if (document.visibilityState === 'visible') unlockAudio(); });
+
 // ---------- Notifications & proximité ----------
 
 // Distance Haversine (m)
@@ -20,49 +43,52 @@ function distanceMeters(a, b){
 // Carillon (proximité ≤5m)
 function playChime(){
   try{
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const ac = getAC(); if (!ac) return;
     const now = ac.currentTime, notes=[880,1174,1568];
     notes.forEach((f,i)=>{
       const o=ac.createOscillator(), g=ac.createGain();
       o.type='sine'; o.frequency.value=f;
       g.gain.setValueAtTime(0.0001, now+i*0.02);
-      g.gain.exponentialRampToValueAtTime(0.05, now+i*0.04);
-      g.gain.exponentialRampToValueAtTime(0.00001, now+0.35+i*0.02);
+      g.gain.exponentialRampToValueAtTime(0.06,   now+i*0.06);
+      g.gain.exponentialRampToValueAtTime(0.00001,now+0.40+i*0.02);
       o.connect(g); g.connect(ac.destination);
-      o.start(now+i*0.02); o.stop(now+0.4+i*0.02);
+      o.start(now+i*0.02); o.stop(now+0.45+i*0.02);
     });
   }catch(e){}
 }
 // Ping (nouvelle demande reçue)
 function playPing(){
   try{
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const ac = getAC(); if (!ac) return;
+    const now = ac.currentTime;
     const o = ac.createOscillator(), g = ac.createGain();
     o.type='triangle'; o.frequency.value=1200;
-    g.gain.value=0.001;
-    g.gain.exponentialRampToValueAtTime(0.08, ac.currentTime+0.02);
-    g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.25);
+    g.gain.setValueAtTime(0.0001, now);
+    g.gain.exponentialRampToValueAtTime(0.09, now+0.03);
+    g.gain.exponentialRampToValueAtTime(0.00001, now+0.28);
     o.connect(g); g.connect(ac.destination);
-    o.start(); o.stop(ac.currentTime+0.28);
+    o.start(now); o.stop(now+0.30);
   }catch(e){}
 }
 // Reply (réponse à TA demande)
 function playReply(){
   try{
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const ac = getAC(); if (!ac) return;
+    const now = ac.currentTime;
     const o1 = ac.createOscillator(), g1 = ac.createGain();
     const o2 = ac.createOscillator(), g2 = ac.createGain();
-    o1.type='sine'; o1.frequency.value=740; // Fa#5
-    o2.type='sine'; o2.frequency.value=988; // Si5
-    g1.gain.value=0.0001; g2.gain.value=0.0001;
-    g1.gain.exponentialRampToValueAtTime(0.06, ac.currentTime+0.02);
-    g2.gain.exponentialRampToValueAtTime(0.05, ac.currentTime+0.06);
-    g1.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.3);
-    g2.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.34);
+    o1.type='sine'; o1.frequency.value=740;  // Fa#5
+    o2.type='sine'; o2.frequency.value=988;  // Si5
+    g1.gain.setValueAtTime(0.0001, now);
+    g2.gain.setValueAtTime(0.0001, now);
+    g1.gain.exponentialRampToValueAtTime(0.06, now+0.02);
+    g2.gain.exponentialRampToValueAtTime(0.05, now+0.06);
+    g1.gain.exponentialRampToValueAtTime(0.00001, now+0.32);
+    g2.gain.exponentialRampToValueAtTime(0.00001, now+0.36);
     o1.connect(g1); g1.connect(ac.destination);
     o2.connect(g2); g2.connect(ac.destination);
-    o1.start(); o2.start(ac.currentTime+0.04);
-    o1.stop(ac.currentTime+0.32); o2.stop(ac.currentTime+0.36);
+    o1.start(now); o2.start(now+0.04);
+    o1.stop(now+0.34); o2.stop(now+0.38);
   }catch(e){}
 }
 
@@ -154,7 +180,7 @@ function initMap(){
 
 function playBeep(){ // (historique) petit bip court
   try{
-    const ac = new (window.AudioContext||window.webkitAudioContext)();
+    const ac = getAC(); if (!ac) return;
     const o = ac.createOscillator(), g = ac.createGain();
     o.type='sine'; o.frequency.value=880;
     g.gain.value=0.001; g.gain.exponentialRampToValueAtTime(0.00001, ac.currentTime+0.18);
@@ -241,7 +267,7 @@ async function loadNearby(){
       profilesById.set(id, prof);
 
       const name = prof.display_name || ('#' + id.slice(0,6));
-      const gender = (prof.gender || '').toString().trim();
+      const gender = (Array.isArray(prof.gender)? prof.gender.join(', ') : (prof.gender||'')).toString().trim();
       const ageTxt = (prof.age && Number(prof.age)>0) ? `${prof.age} ans` : '';
 
       if (sel){ const o = document.createElement('option'); o.value = id; o.textContent = [name, gender, ageTxt].filter(Boolean).join(' · ') || name; sel.appendChild(o); }
@@ -251,7 +277,12 @@ async function loadNearby(){
       else { mk.setLatLng([r.lat, r.lon]); }
 
       const micro = [ gender||'', prof.age?`Âge ${prof.age}`:'', prof.height?`${prof.height} cm`:'', prof.hair?`Cheveux ${prof.hair}`:'', prof.body?`Corps ${prof.body}`:'' ].filter(Boolean).join(' — ');
-      const lines = []; if (name) lines.push(`<b>${name}</b>`); if (micro) lines.push(micro); if (prof.relation_type) lines.push(`Relation : ${prof.relation_type}`); if (prof.recognize) lines.push(`Reconnaître : ${prof.recognize}`);
+      const rel = Array.isArray(prof.relation_type) ? prof.relation_type.join(', ') : (prof.relation_type||'');
+      const lines = [];
+      if (name) lines.push(`<b>${name}</b>`);
+      if (micro) lines.push(micro);
+      if (rel) lines.push(`Relation : ${rel}`);
+      if (prof.recognize) lines.push(`Reconnaître : ${prof.recognize}`);
       mk.bindPopup(lines.join('<br>'));
     }
 
@@ -459,6 +490,7 @@ function wireUI(){
   if (btnAvail){
     btnAvail.addEventListener('click', ()=>{
       writeFlag('available', true);
+      unlockAudio();             // garantit que le son sera autorisé
       toast('Visible (60 min)');
       if (!localStorage.getItem('uid')){ localStorage.setItem('uid', (crypto.randomUUID?.() || String(Date.now()))); }
       locateMe();              // IMPORTANT pour proximité & présence
@@ -474,6 +506,7 @@ function wireUI(){
   if (btnReq && sel){
     btnReq.addEventListener('click', ()=>{
       const to = sel.value; if (!to) { toast('Choisis une personne'); return; }
+      unlockAudio(); // au cas où
       sendIntent(to);
     });
   }
